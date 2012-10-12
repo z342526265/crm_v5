@@ -1,6 +1,0 @@
-<%# encoding: utf-8%>
-<h1>新建部门</h1>
-<%= form_for(@department,:url=>{:controller=>"departments",:action=>"create"}) do |f| %>
-    <%= render :partial => 'form',:locals => {:f=>f} %>
-<% end %>
-<%= link_to_custom '返回', :controller=>"departments",:action=>"index" %>

@@ -1,6 +1,0 @@
-<% # encoding: utf-8 %>
-<h1>编辑角色</h1>
-<%= form_for(@role,:url=>{:controller=>"roles",:action=>"update",:id=>@role}) do |f| %>
-    <%= render :partial => 'form',:locals => {:f=>f} %>
-<% end %>
-<%= link_to_custom 'Back', :controller=>"roles",:action=>"index" %>
