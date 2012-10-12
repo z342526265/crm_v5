@@ -1,0 +1,18 @@
+<table>
+  <tr>
+    <td>客户</td>
+    <td>订单编号</td>
+    <td>联系人</td>
+    <td>联系时间</td>
+    <td>联系结果</td>
+  </tr>
+  <% @serve_records.each do |s_r| %>
+      <tr>
+        <td><%= s_r.order.mini_client.name %></td>
+        <td><%= s_r.order_number %></td>
+        <td><%= s_r.contact_person_name %></td>
+        <td><%=time_format s_r.created_at %></td>
+        <td><%= truncate(s_r.contact_result_text,:length=>30) %></td>
+      </tr>
+  <% end %>
+</table>

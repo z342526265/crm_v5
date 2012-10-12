@@ -1,0 +1,10 @@
+<% # encoding: utf-8 %>
+
+<h2>编辑供应商</h2>
+<br />
+
+<%= form_for @supplier,:url=>{:controller=>"suppliers",:action=>"update",:id=>@supplier} do |f| %>
+
+    <%= render :partial => "form",:locals => {:f=>f} %>
+
+<% end %>

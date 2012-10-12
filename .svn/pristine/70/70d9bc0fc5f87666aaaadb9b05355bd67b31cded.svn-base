@@ -1,0 +1,11 @@
+<% # encoding: utf-8 %>
+<h1>新建客户</h1>
+<%= form_for(@mini_client,:url=>{:controller=>"mini_clients",:action=>'create',:client_id=>@client}) do |f| %>
+
+    <%= render :partial=>'form',:locals=>{:f=>f} %>
+
+<% end %>
+<%= link_to_custom '返回', :controller=>"mini_clients",:action=>'index' %>
+
+
+

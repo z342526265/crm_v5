@@ -1,0 +1,13 @@
+<% # encoding: utf-8 %>
+
+<tr>
+  <td>第<%= @product.develop_steps.count.to_i + 1 %>步</td>
+  <td><%= text_field_tag "develop_step[name]" %></td>
+  <td><%= text_field_tag "develop_step[standard_period]",1,:class=>"_60px" %>天</td>
+  <td>
+    <%= submit_tag "提交" %>
+    <%= link_to "取消","cancel",:remote=>true,:id=>"cancel" %>
+  </td>
+</tr>
+
+

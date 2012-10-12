@@ -1,0 +1,49 @@
+# encoding: utf-8
+class DevelopStep < ActiveRecord::Base
+
+  include SetCreatedUser
+  include CustomAssociationMethod
+
+  #审核
+  has_many :check_items,:as=>:check_resource,:dependent => :destroy
+
+  #当前正在审核的的审核
+  has_one :check_item,:as=>:check_resource,:dependent => :destroy,:conditions => ["is_checked = ?",false]
+
+  has_many :apply_delay_completes
+  has_one :apply_delay_complete,:conditions => ["check_status = ?",0],:order => "created_at DESC"
+
+  # 多态关联
+  belongs_to :develop_step_resource,:polymorphic => true
+
+  belongs_to :user
+
+
+
+
+
+  before_create :set_ordinal_number
+
+  def develop_status_text
+    case develop_status
+      when 1
+        "审核中"
+      when 2
+        "已完成"
+     when 3
+        "延期申请中"
+     when 4
+        "延期申请已通过，当前已延期#{self.delay_count}次"
+      else
+        "开发中"
+    end
+  end
+
+  private
+  def set_ordinal_number
+    if self.develop_step_resource.class_name == "Product"
+      self.ordinal_number = self.develop_step_resource.develop_steps.count + 1
+    end
+  end
+
+end

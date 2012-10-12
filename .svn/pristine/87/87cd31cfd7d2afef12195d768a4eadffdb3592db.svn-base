@@ -1,0 +1,57 @@
+<% # encoding: utf-8 %>
+<table class="popup_form_table">
+  <tr>
+    <td>
+      资产名称：
+      <%= @asset.name %>
+    </td>
+    <td>
+      资产编号：
+      <%= @asset.number %>
+    </td>
+    <td>
+      采购日期：
+      <%= @asset.purchase_date %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      供应商：
+      <%= @asset.supplier_name %>
+    </td>
+    <td>
+      资产类型：
+      <%= @asset.asset_cate_name %>
+    </td>
+    <td>
+      品牌：
+      <%= @asset.brand %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      采购人：
+      <%= @asset.purchase_user_name %>
+    </td>
+    <td>
+      采购方式：
+      <%= @asset.purchase_way_name %>
+    </td>
+    <td>
+      采购价格
+      <%= @asset.purchase_price %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      规格：
+      <%= @asset.standard %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      备注：
+      <%= @asset.description %>
+    </td>
+  </tr>
+</table>

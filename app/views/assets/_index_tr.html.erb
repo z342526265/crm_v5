@@ -1,0 +1,29 @@
+<td><%=link_to asset.number ,{:controller=>"assets",:action => "show",:id=>asset},{:remote=>true,:class=>"asset_show"} %></td>
+<td><%=link_to asset.name ,{:controller=>"assets",:action => "show",:id=>asset},{:remote=>true,:class=>"asset_show"} %></td>
+<td><%= asset.user_name %></td>
+<td><%= asset.brand %></td>
+<td><%= asset.standard %></td>
+<td><%= asset.supplier_name %></td>
+<td><%= asset.purchase_date %></td>
+<td><%= asset.purchase_price %></td>
+<td><%= asset.purchase_user_name %></td>
+<td><%= asset.purchase_way_name %></td>
+<td><%= asset.description %></td>
+<td>
+  <%= link_to_custom "修改",{:controller=>"assets",:action=>"update",:id=>asset} if asset.asset_cate.level == 0 %>
+  <%#= link_to_custom "删除",{:controller=>"assets",:action=>"destroy",:id=>asset},:method=>:delete,:confirm=>"确认删除？" %>
+</td>
+<td>
+  <%#= pp asset.asset_cate %>
+  <% if asset.asset_cate.level == 0  %>
+      <% if asset.user_id.blank? %>
+          <%= form_for asset,:url=>{:controller=>"assets",:action=>"update",:id=>asset},:html => {:remote=>true,:class=>"asset_form_user"} do |f| %>
+              <%= f.select "user_id",User.all.map{|u|[u.name,u.id]},{:prompt=>"请选择使用该资产的员工"},{:class=>"user_select"} %>
+              <%= f.submit "提交" %>
+          <% end %>
+      <% else %>
+          <%= link_to_custom "上交",{:controller=>"assets",:action=>"update",:id=>asset,"asset[user_id]"=>''},{:remote=>true,:class=>"asset_form_user"} %>
+      <% end %>
+  <% end %>
+</td>
+

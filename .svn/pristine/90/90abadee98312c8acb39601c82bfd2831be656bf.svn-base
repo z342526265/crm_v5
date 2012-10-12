@@ -1,0 +1,84 @@
+<% # encoding: utf-8 %>
+<script language="javascript" type="text/javascript" src="/My97DatePicker/WdatePicker.js"></script>
+
+<%= form_for @search, :url => {:action=>"index"}, :html => {:method => :get} do |f| %>
+    <%= f.label :order_item_product_id_eq,"订单产品" %>
+    <%= f.select :order_item_product_id_eq,Product.all.map{|p|[p.name,p.id]} %>
+    <%= f.submit "搜索" %>
+<% end %>
+
+<table>
+  <tr>
+    <th>订单编号</th>
+    <th>客户名称</th>
+    <th>订单产品</th>
+    <th>订单描述</th>
+    <!--<th>服务状态</th>-->
+    <th>合同金额</th>
+    <th>开发状态</th>
+    <th colspan="2">操作</th>
+  </tr>
+  <% @orders.each do |order| %>
+      <tr id='<%= "order_"+order.id.to_s %>'>
+        <td><%= order.number %></td>
+        <td><%= order.mini_client_name %></td>
+        <td><%= order.order_item.product_name %></td>
+        <td><%=truncate order.description,:length=>30 %></td>
+        <!--<td><%#= order.serve_status_text %></td>-->
+        <td><%= order.contract_amount %></td>
+        <td><%= order.develop_status_text %></td>
+        <td><%= link_to_custom "开发任务",{:controller=>"order_develop_steps",:action=>"distribute",:order_id=>order},{:remote=>true,:class=>"distribute"} %></td>
+      </tr>
+  <% end %>
+</table>
+<%= paginate @orders %>
+
+<div id="custom_popup"></div>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".distribute")
+                .bind("ajax:beforeSend", function(evt, xhr, settings){
+                    createPopup();
+                })
+                .bind("ajax:success", function(evt, data, status, xhr){
+                    $("#popup_content").html(data);
+                })
+        $(".update")
+                .live("ajax:beforeSend",function(){
+                    $(this).html(loading_gif);
+                })
+                .live("ajax:success",function(evt,data){
+                    var action_name = $(this).attr("href");
+                    $("#distribute_form").attr("action",action_name);
+                    $(this).parent("td").parent("tr").html(data);
+                    return false;
+                })
+        $(".update_cancel")
+                .live("ajax:beforeSend",function(){
+                    $(this).html(loading_gif);
+                })
+                .live("ajax:success",function(evt,data){
+                    $("#popup_content").html(data);
+                    return false;
+                })
+        $("#distribute_form")
+                .live("ajax:beforeSend",function(){
+                    $("#submit_step").replaceWith(loading_gif);
+                })
+                .live("ajax:success",function(evt,data){
+                    $("#popup_content").html(data);
+                    alert("更新成功！");
+                    return false;
+                })
+        $("#complete_distribute")
+                .live("ajax:beforeSend",function(){
+                    $(this).html(loading_gif);
+                })
+                .live("ajax:success",function(evt,data){
+                    $(this).hide();
+                    return false;
+                })
+
+    })
+</script>

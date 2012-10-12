@@ -1,0 +1,105 @@
+<% # encoding: utf-8 %>
+<div style=" clear:both;height: 5px;_height:0px; width: 100%;"></div>
+<table class="lxrxxnyy" style="margin-top:10px;">
+  <tr bgcolor="#CCFF66">
+    <td colspan="4" align="left">&nbsp;&nbsp;<strong>服务小记</strong></td>
+    <td colspan="1" align="right">
+      <%#= link_to_custom "跳转到订单页",{:controller=>"orders",:action=>"index"} %>
+      <%= link_to_custom "添加服务小记",{:controller=>"mini_clients",:action=>"ajax_serve_record_create",
+                                   :id=>@mini_client},
+                         :remote=>true,:id=>"serve_record_create_id"+@mini_client.id.to_s %>
+    </td>
+  </tr>
+  <tr bgcolor="#CCFF99">
+    <th>订单编号</th>
+    <th>联系人</th>
+    <th>联系时间</th>
+    <th>服务记录</th>
+    <!--<th>订单数量</th>-->
+    <th></th>
+  </tr>
+
+  <% @serve_records.each do |serve_record| %>
+      <tr id="<%= 'serve_record_tr'+serve_record.id.to_s %>">
+        <td><%= serve_record.order_number %></td>
+        <td><%= serve_record.contact_person_name %></td>
+        <td><%=time_format serve_record.created_at %></td>
+        <td><%= link_to_custom(serve_record.contact_result_text,{:controller=>"mini_clients",:action=>"ajax_serve_records_show",:id=>@mini_client},:remote=>true,:class=>"ajax_serve_records_show"+@mini_client.id.to_s )%></td>
+
+        <td id=<%= serve_record.id.to_s+"2666666" %>>
+          <%= link_to_custom "编辑",{:controller=>"mini_clients",:action=>"ajax_serve_record_update",:id=>@mini_client,
+                                   :serve_record_id=>serve_record},:remote=>true,
+                             :class=>"serve_record_list_id"+@mini_client.id.to_s  %>&nbsp;&nbsp;&nbsp;
+          <%= link_to_custom "删除",{:controller=>"mini_clients",:action=>"ajax_serve_record_destroy",:id=>@mini_client,:serve_record_id=>serve_record},
+                             :onclick=>"destroy_and_disabled('#{'serve_record_tr'+serve_record.id.to_s}','确认删除？');return false;",
+                             :remote=>true  %>
+        </td>
+      </tr>
+  <% end %>
+</table>
+
+
+<!-- 弹出层 -->
+<div id='<%="add_serve_record_pop"+@mini_client.id.to_s%>' style="background-color:#CCFF88; border: solid 1px #666666; position: absolute; display:none;
+        width:600px;  left: 30%; top:25%;">
+  <table width="100%">
+    <tr>
+      <td align="center" style="font-size: 16px; line-height: 26px;">
+        <strong>服务小记</strong>
+      </td>
+      <td align="right"><a id='<%= "add_serve_record_pop_close"+@mini_client.id.to_s %>'><img src=<%= asset_path('new_css_v1/3-3main.gif') %> /></a></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <div id='<%= "add_serve_record_div"+@mini_client.id.to_s %>' style="height:360px; overflow-y:scroll;text-align: center; background: #a6ff76" >
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        //动画速度
+        var speed = 500;
+        var client_id = '<%= @mini_client.id.to_s %>'
+        //绑定事件处理  ，新建
+        $("#serve_record_create_id"+client_id).click(function(event)
+        {
+            $.get("/mini_clients/ajax_serve_record_create",{"id":client_id},function(data){
+                $("#add_serve_record_div"+client_id).html(data)
+            })
+            //取消事件冒泡
+            event.stopPropagation();
+            $("#add_serve_record_pop"+client_id).toggle(speed);
+            event.preventDefault();
+        });
+        //绑定事件处理  ，新建联系人
+        $(".serve_record_list_id"+client_id).click(function(event)
+        {
+            var url = this.href
+            $.get(url,{},function(data){
+                $("#add_serve_record_div"+client_id).html(data)
+            })
+            //取消事件冒泡
+            event.stopPropagation();
+            $("#add_serve_record_pop"+client_id).toggle(speed);
+            event.preventDefault();
+        });
+        $("#add_serve_record_pop_close"+client_id).click(function(event) { $("#add_serve_record_pop"+client_id).hide(speed) });
+
+        //绑定事件查看服务小记内容
+        $(".ajax_serve_records_show"+client_id).click(function(event)
+        {
+            var url = this.href
+            $.get(url,{},function(data){
+                $("#add_serve_record_div"+client_id).html(data)
+            })
+            event.stopPropagation();
+            $("#add_serve_record_pop"+client_id).toggle(speed);
+            event.preventDefault();
+        });
+    });
+</script>
+

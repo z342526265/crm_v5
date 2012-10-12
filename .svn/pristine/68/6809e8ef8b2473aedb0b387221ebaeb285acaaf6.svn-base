@@ -1,0 +1,30 @@
+<%= form_for(@order,:url=>{:controller=>"orders",:action=>"ajax_apply_update",:id=>@order},:remote=>true) do |f| %>
+    <%= f.error_messages %>
+    <%= render :partial => "form",:locals=>{:f=>f} %>
+    <%= f.submit "提交" %>
+<% end %>
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        // 输入框日期弹出框
+        $(".time").calendar();
+
+        //删除订单详情的tr
+        $(".ajax_destroy_order_item_tr").click(function(event){
+          $(this).parent().parent().remove();
+        })
+        //增加订单详情的tr
+        $("#ajax_add_order_item_tr").click(function(event){
+          $(this).parent().parent().after("<%=escape_javascript render :partial => "/orders/form_order_item_tr" %>")
+        })
+
+        $('#edit_order_8')
+                .bind("ajax:success", function(evt, data, status, xhr){
+                    //单击空白区域隐藏弹出层
+                    $("#order_show_pop").hide(500);
+                    var order_id = '<%= @order.id %>'
+                    $("#"+"order_index"+order_id).html(data);
+                    alert("修改成功！");
+                })
+
+    })
+</script>

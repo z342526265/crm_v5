@@ -1,0 +1,277 @@
+<% # encoding: utf-8 %>
+<h1>新建客户联系记录</h1>
+<%= form_for(@contact_record,:url=>{:action=>'ajax_create_contact_record',:id => @mini_client},:remote=>true,:html=>{:id=>"add_contact_record_form"+@mini_client.id.to_s}) do |f| %>
+    <table align="center">
+      <tr style="line-height: 26px;">
+        <td align="right">
+          <%= f.label :contact_person,"联系人" %>
+        </td>
+        <td class="yiskask">
+          <%= f.select :contact_person_id,@contact_people.map{|c|[c.name,c.id]} %>
+        </td>
+      </tr>
+      <tr style="line-height: 26px;">
+        <td align="right">
+          <%= f.label :contact_way_id,"联系方式" %>
+        </td>
+        <td class="yiskask">
+          <%= f.select :contact_way_id,Category.find_all_by_cate("contact_way").map{|n|[n.name,n.id]} %>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="2" style="font-weight: bold; line-height: 20px;">
+          <%= f.label :contact_way_id,"联系结果" %>
+        </td>
+      </tr>
+      <tr>
+        <td align="right">
+          <%= f.radio_button :contact_result_id,0 ,:onclick=>"display_items(this,'contact_result_items','contact_result_items2')" %>
+        </td>
+        <td>
+          <%= "无效的联系" %>
+        </td>
+      </tr>
+      <tr>
+        <td align="right">
+          <%= f.radio_button :contact_result_id,1,:onclick=>"display_items(this,'contact_result_items','contact_result_items2')" %>
+        </td>
+        <td>
+          <%= "有效的联系" %>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <table id="contact_result_items" style="display: none;">
+            <tr  style="line-height: 26px;">
+              <td align="right"><%= f.label :introduce_product,"介绍产品" %></td>
+              <td class="yiskask"><%= f.text_field :introduce_product %></td>
+            </tr>
+            <tr  style="line-height: 26px;">
+              <td align="right"><%= f.label :introduce_server,"介绍服务" %></td>
+              <td class="yiskask"><%= f.text_field :introduce_server %></td>
+            </tr>
+            <tr  style="line-height: 26px;">
+              <td align="right"><%= f.label :interest_point,"兴趣点" %></td>
+              <td class="yiskask"><%= f.text_field :interest_point %></td>
+            </tr>
+            <tr  style="line-height: 26px;">
+              <td align="right"><%= f.label :dissent_point,"异议点" %></td>
+              <td class="yiskask"><%= f.text_field :dissent_point %></td>
+            </tr>
+
+            <tr  style="line-height: 26px;">
+              <td align="right"><%= f.label :description,"沟通记录" %></td>
+              <td class="yiskask"><%= f.text_area :description,:rows=>2,:cols=>30 %></td>
+            </tr>
+            <tr  style="line-height: 26px;">
+              <td align="right"><%= f.label :follow_ideas,"跟进思路" %></td>
+              <td class="yiskask"><%= f.text_area :follow_ideas,:rows=>2,:cols=>30 %></td>
+            </tr>
+          </table>
+
+          <table id="contact_result_items2" style="display: none;">
+            <tr  style="line-height: 26px;">
+              <td align="right"><%= f.label :invalid_contact_description,"联系备注" %></td>
+              <td class="yiskask"><%= f.text_field :invalid_contact_description %></td>
+            </tr>
+          </table>
+        </td>
+      <tr>
+        <td colspan="2">
+          <%= f.submit "提交" %>
+          <%#= f.submit "提交",:onclick=>"addContactResultAjaxSubmit('add_contact_record_form','#{'show-tab-2'+@mini_client.id.to_s}','contact_record_follow_ideas','contact_record_description','contact_record_invalid_contact_description');return false;" %>
+        </td>
+      </tr>
+    </table>
+
+    <!--<ul>-->
+    <!--<li><%#= f.label :contact_result_id,"联系结果" %></li>-->
+    <!--<%# Category.by_cate('contact_result').each do |contact_result| %>-->
+    <!--<li><%#= f.radio_button :contact_result_id,contact_result.id %><%#= contact_result.name %></li>-->
+    <!--<%# end %>-->
+    <!--</ul>-->
+
+    <!--<p>联系记录</p>-->
+<% end %>
+<%#= link_to_custom '返回', :action=>'show',:controller=>"clients",:cate_id=>@current_category,:id => @mini_client %>
+
+
+
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+
+        var client_id = '<%= @mini_client.id %>'
+        $("#add_contact_record_form"+client_id)
+                .bind("ajax:beforeSend", function(evt, xhr, settings){
+                    var field1=$("#contact_record_follow_ideas").val();
+                    var field2=$("#contact_record_description").val();
+                    var field3=$("input[type=radio]:checked").val();
+                    var field4=$("#contact_record_invalid_contact_description").val();
+                    if(field1=="" && field3=="1"){
+                        alert("跟进思路不能为空！");
+                        return false;
+                    };
+                    if(field2=="" && field3=="1"){
+                        alert("备注不能为空！") ;
+                        return false;
+                    };
+                    if(field4=="" && field3=="0"){
+                        alert("联系备注不能为空！") ;
+                        return false;
+                    };
+
+                    if(!confirm("确认提交？")){
+                        return false;
+                    };
+                })
+                .bind("ajax:success", function(evt, data, status, xhr){
+                    $("#"+'show-tab-2'+client_id).html(data);
+                    alert("增加成功！")
+                })
+
+//        jQuery('.time').datepick({dateFormat: 'yy-mm-dd'});    //日期自动显示选择框
+//        $("#contact_record_contact_date").calendar();
+
+        //自动可以选择也可以填写的输入框
+        $.getJSON("/categories/ajax_result",{},function(result){
+            var introduce_product = result[0]
+            var introduce_server = result[1]
+            var interest_point = result[2]
+            var dissent_point = result[3]
+            var invalid_contact_description = result[4]
+            $(function() {
+                $('#contact_record_introduce_product').autocomplete(introduce_product, {
+                    max: 30,    //列表里的条目数
+                    minChars: 0,    //自动完成激活之前填入的最小字符
+                    width: 400,     //提示的宽度，溢出隐藏
+                    scrollHeight: 300,   //提示的高度，溢出显示滚动条
+                    matchContains: true,    //包含匹配，就是data参数里的数据，是否只要包含文本框里的数据就显示
+                    autoFill: false,    //自动填充
+                    formatItem: function(row, i, max) {
+                        return i + '/' + max + ':"' + row.name;
+                    },
+                    formatMatch: function(row, i, max) {
+                        return row.name
+                    },
+                    formatResult: function(row) {
+                        return row.name;
+                    }
+                }).result(function(event, row, formatted) {
+                        });
+                $('#contact_record_introduce_server').autocomplete(introduce_server, {
+                    max: 30,    //列表里的条目数
+                    minChars: 0,    //自动完成激活之前填入的最小字符
+                    width: 400,     //提示的宽度，溢出隐藏
+                    scrollHeight: 300,   //提示的高度，溢出显示滚动条
+                    matchContains: true,    //包含匹配，就是data参数里的数据，是否只要包含文本框里的数据就显示
+                    autoFill: false,    //自动填充
+                    formatItem: function(row, i, max) {
+                        return i + '/' + max + ':"' + row.name;
+                    },
+                    formatMatch: function(row, i, max) {
+                        return row.name
+                    },
+                    formatResult: function(row) {
+                        return row.name;
+                    }
+                }).result(function(event, row, formatted) {
+                        });
+                $('#contact_record_interest_point').autocomplete(interest_point, {
+                    max: 30,    //列表里的条目数
+                    minChars: 0,    //自动完成激活之前填入的最小字符
+                    width: 400,     //提示的宽度，溢出隐藏
+                    scrollHeight: 300,   //提示的高度，溢出显示滚动条
+                    matchContains: true,    //包含匹配，就是data参数里的数据，是否只要包含文本框里的数据就显示
+                    autoFill: false,    //自动填充
+                    formatItem: function(row, i, max) {
+                        return i + '/' + max + ':"' + row.name;
+                    },
+                    formatMatch: function(row, i, max) {
+                        return row.name
+                    },
+                    formatResult: function(row) {
+                        return row.name;
+                    }
+                }).result(function(event, row, formatted) {
+                        });
+                $('#contact_record_dissent_point').autocomplete(dissent_point, {
+                    max: 30,    //列表里的条目数
+                    minChars: 0,    //自动完成激活之前填入的最小字符
+                    width: 400,     //提示的宽度，溢出隐藏
+                    scrollHeight: 300,   //提示的高度，溢出显示滚动条
+                    matchContains: true,    //包含匹配，就是data参数里的数据，是否只要包含文本框里的数据就显示
+                    autoFill: false,    //自动填充
+                    formatItem: function(row, i, max) {
+                        return i + '/' + max + ':"' + row.name;
+                    },
+                    formatMatch: function(row, i, max) {
+                        return row.name
+                    },
+                    formatResult: function(row) {
+                        return row.name;
+                    }
+                }).result(function(event, row, formatted) {
+                        });
+                $('#contact_record_invalid_contact_description').autocomplete(invalid_contact_description, {
+                    max: 30,    //列表里的条目数
+                    minChars: 0,    //自动完成激活之前填入的最小字符
+                    width: 400,     //提示的宽度，溢出隐藏
+                    scrollHeight: 300,   //提示的高度，溢出显示滚动条
+                    matchContains: true,    //包含匹配，就是data参数里的数据，是否只要包含文本框里的数据就显示
+                    autoFill: false,    //自动填充
+                    formatItem: function(row, i, max) {
+                        return i + '/' + max + ':"' + row.name;
+                    },
+                    formatMatch: function(row, i, max) {
+                        return row.name
+                    },
+                    formatResult: function(row) {
+                        return row.name;
+                    }
+                }).result(function(event, row, formatted) {
+                        });
+            });
+        });
+    })
+
+
+//    //自定义表单ajax提交，not_null_1_id,not_null_2_id,not_null_3_id为两个不为空的字段id
+//    function addContactResultAjaxSubmit(form_id,replace_id,not_null_1_id,not_null_2_id,not_null_3_id) {
+////        alert($("input[type=radio]:checked").val());
+//        if ($("input[type=radio]:checked").val() == 1){
+//            if (not_null_1_id){
+//                if ($("#"+not_null_1_id).val() == ""){
+//                    alert($("label[for="+not_null_1_id+"]").text()+"不能为空！")
+//                    return false
+//                }
+//            }
+//            if (not_null_2_id){
+//                if ($("#"+not_null_2_id).val() == ""){
+//                    alert($("label[for="+not_null_2_id+"]").text()+"不能为空！")
+//                    return false
+//                }
+//            }
+//        }
+//
+//        if ($("input[type=radio]:checked").val() == 0){
+//            if (not_null_3_id){
+//                if ($("#"+not_null_3_id).val() == ""){
+//                    alert($("label[for="+not_null_3_id+"]").text()+"不能为空！")
+//                    return false
+//                }
+//            }
+//        }
+//
+//        $("#"+form_id).ajaxSubmit(function(data){
+//            if (data == "failed"){
+//                alert("未保存成功，请注意必填字段不能为空！") ;
+//            } else {
+//                $("#"+replace_id).html(data);
+//                alert("保存成功！")
+//            }
+//        })
+//        return false
+//    }
+
+</script>

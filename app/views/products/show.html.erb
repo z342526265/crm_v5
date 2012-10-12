@@ -1,0 +1,127 @@
+<p id="notice"><%= notice %></p>
+
+<table>
+  <tr>
+    <td>产品名称:<%= @product.name %></td>
+  </tr>
+  <tr>
+    <td>产品编号:<%= @product.number %></td>
+  </tr>
+  <tr>
+    <td>产品类别:<%= @product.category_name %></td>
+  </tr>
+  <tr>
+    <td>产品描述:<%= @product.description %></td>
+  </tr>
+</table>
+<br/>
+<br/>
+
+<div><h2>开发步骤</h2></div>
+<%= link_to "增加开发步骤",{:controller=>"product_develop_steps",:action=>"create",:product_id=>@product},{:remote=>true,:id=>"create_develop_step"} %>
+<%= form_tag({:controller=>"product_develop_steps",:action=>"create",:product_id=>@product},{:remote=>true,:id=>"new_develop_step"})  do %>
+    <table id="develop_step_table">
+      <tr>
+        <th>步骤</th>
+        <th>阶段目标</th>
+        <th>开发周期</th>
+        <th>操作</th>
+      </tr>
+      <% @product.develop_steps.each_with_index do |step,i| %>
+          <tr>
+            <%= render :partial => "/product_develop_steps/develop_step_index_tr",:locals => {:step=>step,:product=>@product,:i=>i+1} %>
+          </tr>
+      <% end %>
+
+    </table>
+<% end %>
+
+
+<%= link_to_custom '返回', :controller=>"products",:action=>"index" %>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#create_develop_step")
+                .live("ajax:beforeSend", function(evt, xhr, settings){
+                    createPrintDIV();
+                })
+                .live("ajax:success", function(evt, data, status, xhr){
+                    $("#develop_step_table tbody").append(data);
+                    $(this).hide();
+                    $("#sk").remove();
+                })
+
+        $("#new_develop_step")
+                .live("ajax:beforeSend",function(){
+                    createPrintDIV();
+                })
+                .live("ajax:success",function(evt,data){
+                    $("#develop_step_table tr:last").html(data);
+                    $("#sk").remove();
+                    $("#create_develop_step").show();
+                    alert("添加成功！")
+                })
+        $("#cancel")
+                .live("ajax:beforeSend",function(){
+                    $(this).parent("td").parent("tr").remove();
+                    $("#create_develop_step").show();
+                    return false;
+                })
+        $(".update_develop_step")
+                .live("ajax:beforeSend",function(){
+                    createPrintDIV();
+                    var td_1 = $(this).parent("td");
+                    var td_2 = td_1.prev("td");
+                    var td_3 = td_2.prev("td");
+                    var tr = td_1.parent("tr");
+                    var input_text = '<td><input id="develop_step_name" type="text" name="develop_step[name]"></td>' +
+                            '<td><input id="develop_step_standard_period" class="_60px" type="text" value="1" name="develop_step[standard_period]"></td>' +
+                            '<td><input type="submit" value="提交" name="commit"><a id="update_cancel" data-remote="true" href="">取消</a></td>' ;
+                    td_1.hide();
+                    td_2.hide();
+                    td_3.hide();
+                    tr.append(input_text);
+                    $("#new_develop_step").attr("action",$(this).attr("href"));
+                    $("#new_develop_step").attr("id","update_develop_step");
+                    $("#create_develop_step").hide();
+                    $("#sk").remove();
+                    return false;
+                })
+        $("#update_cancel")
+                .live("ajax:beforeSend",function(){
+                    var td = $(this).parent("td");
+                    td.prevAll("td").show();
+                    td.prev("td").prev("td").remove();
+                    td.prev("td").remove();
+                    td.remove();
+                    var action_text = $("#update_develop_step").attr("action").replace("update","create")
+                    $("#update_develop_step").attr("action",action_text);
+                    $("#update_develop_step").attr("id","new_develop_step");
+                    $("#create_develop_step").show();
+                    return false;
+                })
+        $("#update_develop_step")
+                .live("ajax:beforeSend",function(){
+                    createPrintDIV();
+                })
+                .live("ajax:success",function(evt,data){
+
+                    var td = $("#update_cancel").parent("td");
+                    var tds = td.prevAll("td");
+                    tds.prevAll("td").show();
+                    td.remove();
+                    $(tds[0]).remove();
+                    $(tds[1]).remove();
+                    $(tds[3]).text(data[1]+"天");
+                    $(tds[4]).text(data[0]);
+
+                    var action_text = $("#update_develop_step").attr("action").replace("update","create")
+                    $("#update_develop_step").attr("action",action_text);
+                    $("#update_develop_step").attr("id","new_develop_step");
+                    $("#create_develop_step").show();
+                    $("#sk").remove();
+                    $("#create_develop_step").show();
+                    alert("修改成功！")
+                })
+    })
+</script>

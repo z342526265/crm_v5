@@ -1,0 +1,50 @@
+<h1>订单详细</h1>
+
+<table>
+  <tr>
+    <td>订单编号：<%= @order.number %></td>
+    <td>订单总价：<%= @order.contract_amount %></td>
+    <td>客户名称：<%= @order.client_name %></td>
+  </tr>
+  <tr>
+    <td>合同金额：<%= @order.contract_amount %></td>
+    <td>已收金额：<%= @order.received_amount %></td>
+    <td>欠款金额：<%= @order.owe_amount %></td>
+  </tr>
+  <tr>
+    <td>客户联系人：<%= @order.contact_person_name %></td>
+    <td>业务员：<%= @order.created_user_name %></td>
+    <td></td>
+  </tr>
+</table>
+ <table>
+   <tr>
+     <th>选择产品</th>
+     <th>总价</th>
+     <th>已收金额</th>
+     <th>欠款金额</th>
+     <th>服务开始时间</th>
+     <th>服务结束时间</th>
+   </tr>
+
+   <% @order.order_items.each do |item| %>
+     <tr>
+       <td><%= item.product_name %></td>
+       <td><%= item.contract_amount %></td>
+       <td><%= item.received_amount %></td>
+       <td><%= item.owe_amount %></td>
+       <td><%=time_show_date item.serve_start_at %></td>
+       <td><%=time_show_date item.serve_end_at %></td>
+     </tr>
+   <% end %>
+ </table>
+<table>
+  <tr>
+    <td>订单描述：<%= @order.description %></td>
+  </tr>
+</table>
+
+
+
+        
+        

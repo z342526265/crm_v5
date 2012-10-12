@@ -1,0 +1,47 @@
+<table class="fuwuxiaoji">
+  <tr>
+    <td align="right">
+      <%= f.label :contact_person_id,"联系人" %>
+    </td>
+    <td><%= f.select :contact_person_id,@contact_people.map{|c|[c.name,c.id]} %><%= required_tag %></td>
+  </tr>
+  <tr>
+    <td align="right">
+      <%= f.label :contact_way_id,"联系方式" %>
+    </td>
+    <td><%= f.select :contact_way_id,Category.find_all_by_cate("serve_way").map{|n|[n.name,n.id]} %><%= required_tag %></td>
+  </tr>
+  <tr>
+    <td align="right">
+      <%= f.label :order_id,"服务的订单" %>
+    </td>
+    <td><%= f.select :order_id,@mini_client.orders.map{|o|[o.number,o.id]} %><%= required_tag %></td>
+  </tr>
+  <tr>
+    <td align="right">
+      <%= "无效的联系" %>
+    </td>
+    <td><%= f.radio_button :contact_result_id,0,:onclick=>"display_items(this,'valid_contact','invalid_contact')" %></td>
+  </tr>
+  <tr>
+    <td align="right">
+      <%= "有效的联系" %>
+    </td>
+    <td><%= f.radio_button :contact_result_id,1,:onclick=>"display_items(this,'valid_contact','invalid_contact')" %></td>
+  </tr>
+  <tr id="valid_contact" style="display: none;">
+    <td align="right">
+      <%= f.label :content,"服务备注" %>
+    </td>
+    <td><%= f.text_area :content,:cols=>30,:rows=>8 %><%= required_tag %></td>
+  </tr>
+  <tr id="invalid_contact" style="display: none;">
+    <td align="right">
+      <%= f.label :invalid_contact_description,"无效联系情况描述" %>
+    </td>
+    <td><%= f.text_field :invalid_contact_description %><%= required_tag %></td>
+  </tr>
+  <tr>
+    <td colspan="2"><%= f.submit "提交" %></td>
+  </tr>
+</table>

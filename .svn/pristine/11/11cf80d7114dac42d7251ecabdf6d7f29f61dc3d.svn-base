@@ -1,0 +1,162 @@
+# encoding: utf-8
+class MiniClient < ActiveRecord::Base
+  # attr_accessible :title, :body
+  include SetCreatedUser
+  include CustomAssociationMethod
+
+  belongs_to :public_store
+  belongs_to :user
+  belongs_to :share_user,:foreign_key => "share_user_id",:class_name => "User"
+  belongs_to :client   #属于某一个基础客户
+
+
+  has_many :contact_people,:foreign_key => "mini_client_id",:class_name => "ContactPerson",:order=>"Created_at DESC"
+  has_many :contact_records,:order=>"Created_at DESC"
+  has_many :contact_reminds,:order=>"Created_at DESC"
+  has_many :serve_records,:order=>"Created_at DESC"
+  has_many :orders,:order=>"Created_at DESC"
+  has_many :order_items,:through => :orders,:order=>"Created_at DESC"
+
+  has_many :update_logs,:as=>:update_logs_resource,:order=>"Created_at DESC"
+  #has_many :check_items,:as=>:check_items_resource
+  has_many :check_items,:as=>:check_resource
+
+
+  belongs_to :serve_user1,:class_name=>"User",:foreign_key => "serve_user1_id"
+  belongs_to :serve_user2,:class_name => "User",:foreign_key => "serve_user2_id"
+
+  #belongs_to :created_user,:foreign_key => "created_user_id",:class_name => "User"
+
+  attr_readonly :orders_count
+
+
+  validates_uniqueness_of :client_id,:scope => :public_store_id
+
+
+  STATUS_NUM = {
+      0=>"公海",
+      1=>"自己录入",
+      2=>"电话客户",
+      3=>"保护客户",
+      4=>"成单客户"
+  }
+
+
+  #定义把client中的属性定义为mini_client的方法，保持同步
+  Client::COLUMN_NAMES.each do |c|
+    define_method c do
+      self.client.send(c)
+    end
+    define_method c+"=" do |v|
+      self.client.send(c+"=",v)
+    end
+  end
+
+  #保护状态字符串
+  def protect_status_text
+    STATUS_NUM[self.status_num] rescue "-"
+  end
+
+  #剩余保护时间 秒数
+  def remaining_protect_seconds(user = User.new)
+    self.due_time - Time.now
+  end
+
+  def remaining_protect_time(user = User.new)
+    seconds_to_datetime(self.due_time - Time.now)
+  end
+
+
+  def serve_status
+    self.order_items.any?{|item|item.serve_end_at > Date.today}
+  end
+
+  def serve_status_text
+    self.serve_status ? "正常服务中..." : "所有订单的服务已到期！"
+  end
+
+  def serve_due_time
+    self.order_items.map{|item|item.serve_end_at}.min
+  end
+
+  before_create :set_data_1,:set_data_2
+  after_create :set_data_3
+  before_update :set_protect_time
+  #after_update :save_update_log
+  after_save :set_data_4
+
+  private
+
+  #查看当前用户所保护的客户数量是否超出范围
+  def check_protect_client_num
+    raise "超出可保护数量" if User.current.had_protect_client_num > User.current.can_protect_client_num
+  end
+
+  #设置创建人和状态
+  def set_data_1
+    self.status_num = 1
+    self.user = User.current
+  end
+
+  #设置保护时间
+  def set_data_2
+    self.due_time = Time.now + ProtectTime[1]
+  end
+
+  #创建用户时默认创建一个联系人
+  def set_data_3
+    contact_person_attrs = {
+        :mini_client_id=>self.id,
+        :name=>self.contact,
+        :mobile => self.mobile,
+        :tel => self.tel,
+        :qq => self.qq,
+        :email =>self.email
+    }
+    ContactPerson.create(contact_person_attrs)
+  end
+
+
+  def set_data_4
+    self.client.save
+  end
+
+  #更新时设置保护时间
+  #STATUS_NUM = {
+  #    0=>"公海",
+  #    1=>"自己录入",
+  #    2=>"电话客户",
+  #    3=>"保护客户",
+  #    4=>"成单客户"
+  #}
+  def set_protect_time
+    return unless self.status_num_change
+    case self.status_num_change.second
+      when 0
+        self.due_time = Time.now
+      when 2
+        self.due_time = Time.now + ProtectTime[2]
+      when 3
+        # check_protect_client_num,raise ""
+        check_protect_client_num
+        self.due_time = self.due_time + ProtectTime[3]
+    end
+  end
+
+  def seconds_to_datetime(remaining_time)
+    if remaining_time < 0
+      return "0天0小时0分"
+    end
+    #把秒数转换成xx天xx时xx分
+    days = remaining_time/(24*60*60)
+    remainder1 = remaining_time%(24*60*60)
+    hours = remainder1/(60*60)
+    remainder2 = remainder1%(60*60)
+    minutes = remainder2/(60)
+    days = days>0 ? days.to_i : 0
+    hours = hours>0 ? hours.to_i : 0
+    minutes = minutes>0 ? minutes.to_i : 0
+    return "#{days}天#{hours}小时#{minutes}分"
+  end
+
+end

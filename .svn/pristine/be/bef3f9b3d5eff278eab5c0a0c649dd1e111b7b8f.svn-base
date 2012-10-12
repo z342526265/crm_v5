@@ -1,0 +1,64 @@
+共有<font color="#a52a2a">&nbsp;<%= @mini_clients_count %>&nbsp;</font> 条记录，分为 <font color="#a52a2a">&nbsp;<%= pages_count(@mini_clients_count,@every_page_count) %>&nbsp;</font>页显示，目前显示第<font color="#a52a2a">&nbsp;<%= params[:page] || 1 %>&nbsp;</font>页
+<table width="100%"  class="kehuliebiaoys">
+
+  <tr>
+    <th>全选<br /><input type="checkbox" name="chk_all" id="chk_all" /></th>
+    <th>名称</th>
+    <th>类别</th>
+    <th>到期时间</th>
+    <th>联系</th>
+    <th>维护</th>
+    <th>拜访</th>
+    <th>最近服务时间</th>
+    <th>最近一次服务内容</th>
+    <th>客服1</th>
+    <th colspan="4">操作</th>
+  </tr>
+  <%#= form_tag "/clients/multi_process?cate_id=#{@current_category.id}" do %>
+
+  <% @mini_clients.each do |client| %>
+      <tr id='<%= "client_tr"+client.id.to_s %>'>
+        <td><%= check_box_tag "client_ids[]", client.id %><%= client.number %></td>
+        <% tab_name = (client.name.gsub(@shield_fields_regular,"")[0,6]) rescue "-" %>
+        <td><a href="#" name="<%= client.id %>" onclick="showTab(this,'/mini_clients/ajax_show?id=<%= client.id %>','<%= tab_name %>');return false;"><%= tab_name %></a> </td>
+        <td><%=truncate client.client.grade_text ,:length=>20 %></td>
+        <td><%= client.serve_due_time_first.to_s %></td>
+        <td><%= client.serve_records_count %></td>
+        <td><%= client.update_news_records_count %></td>
+        <td><%= client.visit_home_records_count %></td>
+        <% serve_record = client.serve_records.first %>
+        <td><%= time_format((serve_record.present? ? serve_record.created_at : "不存在服务记录")) %></td>
+        <td><%= truncate((serve_record.present? ? serve_record.contact_result_text : "不存在服务记录"),:length=>25) %></td>
+        <td><%= client.serve_user1_name %></td>
+        <!--<td><%#= client.serve_user2_name %></td>-->
+        <td colspan="4">
+          <%= form_tag "/mini_clients/distribute_client_to_server?mini_client_id=#{client.id}",:remote=>true,:class=>"distribute_client_to_server" do %>
+              分配给：<%= select_tag "user_id",options_from_collection_for_select(User.subordinate_users(@current_user), "id", "name") %>
+              <%= submit_tag "提交" %>
+          <% end %>
+        </td>
+      </tr>
+  <% end %>
+</table>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".distribute_client_to_server")
+                .bind("ajax:beforeSend", function(evt, xhr, settings){
+                    if(!confirm("确定？")){
+                        return false;
+                    }else{
+                        createPrintDIV();
+                    }
+                })
+                .bind("ajax:success", function(evt, data,status, xhr){
+                    if(data=="failed"){
+                        alert("未分配成功！")
+                    }else{
+                        $("#ajax_index_table_v4").html(data);
+                        alert("分配成功！");
+                    }
+                    $("#sk").remove();
+                })
+    })
+</script>

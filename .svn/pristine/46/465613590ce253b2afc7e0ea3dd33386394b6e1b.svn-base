@@ -1,0 +1,93 @@
+  <table style="display:none;" bgcolor="#CDE2B1" id="<%= (num+1).to_s + "11" %>">
+    <tr><td colspan="4" style="font-weight: bold;">基本信息</td></tr>
+    <tr align="left">
+      <td>
+        <strong>客户名称:</strong>
+        <%= client.name %>
+      </td>
+      <td>
+       <strong> 公司网站:</strong>
+        <%= client.web_url %>
+      </td>
+      <td colspan="2">
+        <strong>地址:</strong>
+        <%= client.address %>
+      </td>
+    </tr>
+    <tr align="left">
+      <td>
+       <strong> 行业:</strong>
+        <%= client.trade %>
+      </td>
+      <td>
+        <strong>企业法人:</strong>
+        <%= client.legal_person %>
+      </td>
+      <td>
+        <strong>注册资金:</strong>
+        <%= client.fund %>
+      </td>
+      <td>
+       <strong> 成立日期:</strong>
+        <%= client.found_date %>
+      </td>
+    </tr>
+    <tr align="left">
+      <td colspan="2">
+       <strong> 主要业务范围:</strong>
+        <%= client.main_business %>
+      </td>
+      <td colspan="2">
+       <strong> 主要客户群:</strong>
+        <%= client.main_client_base %>
+      </td>
+    </tr>
+    <tr align="left">
+      <td colspan="2">
+        <strong>市场范围:</strong>
+        <%= client.business_rang %>
+      </td>
+      <td colspan="2">
+        <strong>市场区域:</strong>
+        <%= client.business_area %>
+      </td>
+    </tr>
+    <tr align="left">
+      <td colspan="4">
+        <strong>其他:</strong>
+        <%= client.description %>
+      </td>
+    </tr>
+
+    <% if client.status_num == 0 %>
+        <tr bgcolor="#87EA00" align="left">
+          <td>
+          <strong>联系人:</strong>
+            <%= client.contact %>
+          </td>
+          <td>
+           <strong> 手机:</strong>
+            <%= client.mobile %>
+          </td>
+          <td colspan="2">
+           <strong>电话:</strong>
+            <%= client.tel %>
+          </td>
+        </tr>
+        <tr bgcolor="#87EA00" align="left">
+          <td>
+           <strong> 传真: </strong>
+            <%= client.fax %>
+          </td>
+          <td>
+           <strong>QQ/MSN:</strong>
+            <%= client.qq %>
+          </td>
+          <td colspan="2">
+           <strong> 邮箱:</strong>
+            <%= client.email %>
+          </td>
+        </tr>
+    <% end %>
+  </table>
+

@@ -1,0 +1,83 @@
+# encoding: utf-8
+class DevelopStep < ActiveRecord::Base
+
+  include SetCreatedUser
+  include CustomAssociationMethod
+
+  #审核
+  has_many :check_items,:as=>:check_resource,:dependent => :destroy
+
+  #当前正在审核的的审核
+  has_one :check_item,:as=>:check_resource,:dependent => :destroy,:conditions => ["is_checked = ?",false]
+
+  has_many :apply_delay_completes,:dependent => :destroy
+  has_one :apply_delay_complete,:conditions => ["check_status = ?",0],:order => "created_at DESC",:dependent => :destroy
+
+  # 多态关联
+  belongs_to :develop_step_resource,:polymorphic => true
+
+  belongs_to :user
+
+
+
+
+
+
+  def develop_status_text
+    case develop_status
+      when 1
+        "审核中"
+      when 2
+        "已完成"
+      when 3
+        "延期申请中"
+      when 4
+        "延期申请已通过，当前已延期#{self.delay_count}次"
+      else
+        "开发中"
+    end
+  end
+
+  #显示所有的订单
+  def self.order_develop_steps
+    self.where("develop_step_resource_type = 'Order'")
+  end
+
+  def order
+    if self.develop_step_resource_type == "Order"
+      self.develop_step_resource
+    else
+      raise "不存在订单"
+    end
+  end
+
+  #是否是最后一个开发步骤
+  def last_step?
+    self.develop_step_resource.last_develop_step.id == self.id
+  end
+
+  before_create :set_ordinal_number
+  after_update :set_order_develop_status
+
+
+  private
+
+  #如果是最后一个步骤完成，则设置订单的状态为已完成
+  def set_order_develop_status
+    #pp "99999999999999999"
+    #pp self.last_step?
+    # pp self.develop_status == 2
+    if self.last_step? && self.develop_status == 2
+      self.order.update_attribute("develop_status",4)
+    end
+  end
+
+  def set_ordinal_number
+    if self.develop_step_resource_type == "Product"
+      self.ordinal_number = self.develop_step_resource.develop_steps.count + 1
+    elsif self.develop_step_resource_type == "Order"
+      self.client_name = self.develop_step_resource.client_name
+    end
+  end
+
+end

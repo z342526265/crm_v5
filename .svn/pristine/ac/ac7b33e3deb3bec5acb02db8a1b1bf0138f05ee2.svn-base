@@ -1,0 +1,55 @@
+<%= form_for(@order,:url=>{:controller=>"orders",:action=>"ajax_create",:id=>@order,:mini_client_id=>@mini_client},:remote=>true) do |f| %>
+    <%= f.error_messages %>
+    <%= render :partial => "/orders/form",:locals => {:f=>f} %>
+    <%= f.submit "提交" %>
+<% end %>
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        // 输入框日期弹出框
+        $(".time").calendar();
+        //删除订单详情的tr
+        $(".ajax_destroy_order_item_tr").click(function(event){
+            $(this).parent().parent().remove();
+        })
+        //增加订单详情的tr
+        $("#ajax_add_order_item_tr").click(function(event){
+            $(this).parent().parent().after("<tr>"+'<%=escape_javascript render :partial => "/orders/form_order_item_tr" %>'+"</tr>")
+        })
+
+        var client_id = '<%= @mini_client.id %>'
+        $('#new_order')
+                .bind("ajax:beforeSend",function(evt,xhr,settings){
+                    var i = 0;
+                    var j = 0;
+                    $("#order_item_form_table").find("tr").each(function(){
+                        if(i!=0){
+                            var v1 = this.cells[1].firstChild.value;
+                            var v2 = this.cells[2].firstChild.value;
+                            if (v1=="" || v2==""){
+                                alert("总价和已收款项都不能为空！");
+                                j = 1;
+                            }else {
+                                v1 = parseFloat(v1);
+                                v2 = parseFloat(v2);
+                                if(v1 < v2){
+                                    alert("总价不能小于已收款项！");
+                                    j = 1;
+                                }
+                            }
+                        }
+                        i=1;
+                    })
+                    if(j==1){
+                        return false;
+                    }else{
+                        $("#order_show_pop"+client_id).hide();
+                        createPrintDIV();
+                    };
+                })
+                .bind("ajax:success", function(evt, data, status, xhr){
+                    alert("增加成功！");
+                    $("#"+'<%= "show-tab-4"+@mini_client.id.to_s %>').html(data);
+                    $("#sk").remove();
+                })
+    })
+</script>

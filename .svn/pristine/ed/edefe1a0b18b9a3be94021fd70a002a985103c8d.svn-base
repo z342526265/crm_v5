@@ -1,0 +1,43 @@
+<% # encoding: utf-8 %>
+
+<p>我的联系提醒</p>
+<table>
+  <tr>
+    <th>提醒时间</th>
+    <th>内容</th>
+    <th>是否执行</th>
+    <th></th>
+  </tr>
+  <% @contact_reminds.each do |reminding| %>
+      <tr>
+        <td><%= reminding.remind_datetime %></td>
+        <td><%= reminding.remind_content %></td>
+        <td><%= reminding.is_reminded ? "是" : "否" %></td>
+        <td><%= link_to_custom "添加联系记录",:controller => "contact_records",:action=>"new",:reminding_id=>reminding,:client_id=>reminding.client,:cate_id=>@current_user.the_category_by_client(reminding.client) unless reminding.is_reminded? %></td>
+      </tr>
+  <% end %>
+</table>
+
+<% if @check_items.present? %>
+
+<p>待审核事项</p>
+<table>
+  <tr>
+    <th>待审核对象</th>
+    <th>描述</th>
+    <th></th>
+  </tr>
+  <% @check_items.each do |check_item| %>
+      <tr>
+        <td><%= check_item.name %></td>
+        <td><%= check_item.description %></td>
+        <td>
+          <%= link_to_custom "通过",{:controller => "clients",:action=>"check",:result=>true,:id=>check_item},:method=>"post" %>|
+          <%= link_to_custom "驳回",{:controller => "clients",:action=>"check",:result=>false,:id=>check_item},:method=>"post" %>
+        </td>
+      </tr>
+  <% end %>
+</table>
+
+<% end %>
+

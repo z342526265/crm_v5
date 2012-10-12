@@ -1,0 +1,80 @@
+# encoding: utf-8
+class ClientsController < ApplicationController
+
+  def index
+    @search = Client.search(params[:search])
+    @clients = @search.includes(:mini_clients=>:public_store).page(params[:page]).per(@every_page_count)
+  end
+
+  def edit
+    @client = Client.find(params[:id])
+  end
+
+   def destroy
+     @client = Client.find(params[:id])
+     if @client.destroy
+       flash[:notice] = "删除成功！"
+     else
+       flash[:notice] = "未成功！"
+     end
+     redirect_to :back
+   end
+
+  def update
+    @client = Client.find(params[:id])
+    @client.update_attributes(params[:client])
+    redirect_to :action=>"index"
+  end
+
+  def show
+    @client = Client.find(params[:id])
+  end
+
+  #批量处理
+  #把选中的客户加入我的客户库
+  def multi_process
+    if params[:client_ids]
+      @public_store = PublicStore.find(params[:public_store_id])
+      mini_clients_attrs = params[:client_ids].map{|c|{"client_id"=>c}}
+      @public_store.mini_clients.create(mini_clients_attrs)
+      flash[:notice] = "处理成功！"
+    else
+      flash[:alert] = "clients can not blank!"
+    end
+    redirect_to :back
+  end
+
+
+  def ajax_create_mini_client
+    if params[:client_id].present? && params[:public_store_id].present?
+      @client = Client.find(params[:client_id])
+      @mini_client = @client.mini_clients.create(:client_id=>params[:client_id],:public_store_id=>params[:public_store_id])
+      render :js=>"$('#sk').remove();alert('客户#{@mini_client.name}已经加入到您的电话库！');"
+    else
+      render :js=>"alert('参数有误！');"
+    end
+  end
+
+
+  #改变客户类别
+  def update_grade
+    @client = Client.find(params[:id])
+    grade_id = params[:client][:grade_id]
+    @grade = Category.find(grade_id)
+    if @grade.need_verify? && @client.grade_id != grade_id
+      ActiveRecord::Base.transaction do
+        @check_item = @client.check_items.build(:attrs=>{:grade_id=>grade_id},:name=>"客户#{@client.name}类别改变审核",:description=>"客户#{@client.name}类别申请改变为#{@grade.name},需要审核！")
+        @check_item.save
+        @check_item.users = Permission.find_by_cate(29).users
+      end
+      redirect_to :back
+      flash[:notice] = "所需更改经过审核,如果审核通过,更改才能完成。请等待审核结果。"
+    else
+      @client.update_attributes(params[:client])
+      redirect_to :back
+      flash[:notice] = '更新成功.'
+    end
+  end
+
+
+end

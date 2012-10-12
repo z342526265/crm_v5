@@ -1,0 +1,13 @@
+class Supplier < Client
+
+  def self.all
+    self.where("cate = 1")
+  end
+
+  before_save :set_cate
+
+  def set_cate
+    self.cate = 1
+  end
+
+end

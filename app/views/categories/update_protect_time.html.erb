@@ -1,0 +1,24 @@
+<% # encoding: utf-8 %>
+<h1>编辑</h1>
+
+<%= form_for(@protect_time,:url=>{:controller=>"categories",:action=>"update_protect_time",:id=>@protect_time},:html=>{:method=>:post}) do |f| %>
+    <%= f.error_messages %>
+    <table>
+      <tr>
+        <td>类型</td>
+        <td><%= @protect_time.name %></td>
+      </tr>
+      <tr>
+        <td><%= f.label :time_length,"保护时间" %></td>
+        <td><%= f.text_field :time_length %>小时</td>
+      </tr>
+
+      <tr>
+        <td colspan="2">
+          <%= f.submit "提交" %>
+        </td>
+      </tr>
+    </table>
+<% end %>
+
+<%= link_to_custom '返回', :controller=>"categories",:action=>"protect_time_index",:cate=>params[:cate] %>

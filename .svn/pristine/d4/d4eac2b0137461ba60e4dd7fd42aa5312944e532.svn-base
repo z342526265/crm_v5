@@ -1,0 +1,2 @@
+module NotCategorySettingsHelper
+end

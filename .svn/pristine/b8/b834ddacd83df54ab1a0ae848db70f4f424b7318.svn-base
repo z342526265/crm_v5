@@ -1,0 +1,52 @@
+<td><%=link_to asset.number ,{:controller=>"assets",:action => "show",:id=>asset},{:remote=>true,:class=>"asset_show"} %></td>
+<td><%=link_to asset.name ,{:controller=>"assets",:action => "show",:id=>asset},{:remote=>true,:class=>"asset_show"} %></td>
+<td><%= asset.user_name %></td>
+<td><%= asset.brand %></td>
+<td><%= asset.standard %></td>
+<td><%= asset.supplier_name %></td>
+<td><%= asset.purchase_date %></td>
+<td><%= asset.purchase_price %></td>
+<td><%= asset.purchase_user_name %></td>
+<td><%= asset.purchase_way_name %></td>
+<td><%= asset.description %></td>
+<td>
+  <%= link_to_custom "修改",{:controller=>"assets",:action=>"update",:id=>asset} %>
+  <%#= link_to_custom "删除",{:controller=>"assets",:action=>"destroy",:id=>asset},:method=>:delete,:confirm=>"确认删除？" %>
+</td>
+<td>
+  <% if asset.user_id.blank? %>
+      <%= form_for asset,:url=>{:controller=>"assets",:action=>"update",:id=>asset},:html => {:remote=>true,:class=>"asset_form_user"} do |f| %>
+          <%= f.select "user_id",User.all.map{|u|[u.name,u.id]},{:prompt=>"请选择使用该资产的员工"},{:class=>"user_select"} %>
+          <%= f.submit "提交" %>
+      <% end %>
+  <% else %>
+      <%= link_to_custom "上交",{:controller=>"assets",:action=>"update",:id=>asset,"asset[user_id]"=>''},{:remote=>true,:class=>"asset_form_user"} %>
+  <% end %>
+</td>
+
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".asset_form_user")
+                .bind("ajax:beforeSend", function(evt, xhr, settings){
+                    createPrintDIV();
+                })
+                .bind("ajax:success",function(evt,data){
+                    var user_name = $(this).find("select").eq(0).children(":selected").text() || "-";
+//                        var txt = $(this).parent("td").prevAll("td").eq(-3).text();
+//                    $(this).parent("td").prevAll("td").eq(-3).text(user_name);
+                    $(this).parent("td").parent("tr").html(data);
+                    $("#sk").remove();
+                })
+
+        $(".asset_show")
+                .bind("ajax:beforeSend", function(evt, xhr, settings){
+                    createPopup();
+                })
+                .bind("ajax:success",function(evt,data){
+                    $("#popup_content").html(data);
+                })
+
+    })
+
+</script>

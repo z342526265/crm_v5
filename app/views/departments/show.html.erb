@@ -1,0 +1,31 @@
+<%# encoding: utf-8%>
+<p id="notice"><%= notice %></p>
+  <div style="width:600px; text-align: left; line-height: 26px; margin: 0 auto;">
+<p>
+  <strong>部门名称:</strong>
+  <%= @department.name %>
+</p>
+
+<p>
+  <strong>部门负责人:</strong>
+  <%= @department.manager_name %>
+</p>
+
+<p>
+  <strong>上级部门:</strong>
+  <%= @department.parent_name %>
+</p>
+
+<p>
+  <strong>部门描述:</strong>
+  <%= @department.description %>
+</p>
+
+<p>
+  <strong>部门级别:</strong>
+  <%= Department::CATE[@department.cate-1].first %>
+</p>
+    <%= link_to_custom '编辑', :controller=>"departments",:action=>"edit",:id=>@department %> |
+    <%= link_to_custom '返回', :controller=>"departments",:action=>"index" %>
+  </div>
+

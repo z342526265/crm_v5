@@ -1,0 +1,9 @@
+<h3>延期申请</h3>
+
+<%= form_for @apply_delay_complete,:url=>{:controller=>"order_develop_steps",:action=>"apply_delay_complete",:order_id=>@order,:develop_step_id=>@develop_step},:html=>{:remote=>true,:develop_step_id=>@develop_step.id} do |f| %>
+    <%= f.label "apply_delay_date" ,"计划完成日期" %>
+    <%= f.text_field "apply_delay_date",:onClick=>"WdatePicker()",:class=>"_100px" %>
+    <%= f.label "apply_delay_reason","延期理由" %>
+    <%= f.text_field "apply_delay_reason",:class=>"_400px" %>
+    <%= f.submit "提交" %>
+<% end %>

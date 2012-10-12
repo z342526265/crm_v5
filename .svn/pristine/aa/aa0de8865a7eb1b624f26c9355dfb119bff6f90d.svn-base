@@ -1,0 +1,71 @@
+<% c_action = {:controller=>"home",:action=>"main_menu"} %>
+<table width="98%" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr><td height="5"></td><td height="5"></td><td height="5"></td></tr>
+  <tr>
+    <td height="40">
+      <div align="center">
+        <%= link_to_custom image_tag(asset_path("new_css_v1/main_3001.gif")),c_action,:remote=>true,:id=>"0",:class=>"main_menu_link" %><br/>
+        <%= link_to_custom "首页",c_action,:remote=>true,:id=>"00",:class=>"main_menu_link" %>
+      </div>
+    </td>
+    <td height="40">
+      <div align="center">
+        <%= link_to_custom image_tag(asset_path("new_css_v1/main_28.gif")),c_action,:remote=>true,:id=>"1",:class=>"main_menu_link" %><br/>
+        <%= link_to_custom "人事",c_action,:remote=>true,:id=>"11",:class=>"main_menu_link" %>
+      </div>
+    </td>
+    <td height="40">
+      <div align="center">
+        <%= link_to_custom image_tag(asset_path("new_css_v1/main_31.gif")),c_action,:remote=>true,:id=>"2",:class=>"main_menu_link" %><br/>
+        <%= link_to_custom "部门",c_action,:remote=>true,:id=>"22",:class=>"main_menu_link" %>
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td height="40">
+      <div align="center">
+        <%= link_to_custom image_tag(asset_path("new_css_v1/main_3002.gif")),c_action,:remote=>true,:id=>"3",:class=>"main_menu_link" %><br/>
+        <%= link_to_custom "角色",c_action,:remote=>true,:id=>"33",:class=>"main_menu_link" %>
+      </div>
+    </td>
+    <td height="40">
+      <div align="center">
+        <%= link_to_custom image_tag(asset_path("new_css_v1/main_3003.gif")),c_action,:remote=>true,:id=>"4",:class=>"main_menu_link" %><br/>
+        <%= link_to_custom "客户",c_action,:remote=>true,:id=>"44",:class=>"main_menu_link" %>
+      </div>
+    </td>
+    <td height="40">
+      <div align="center">
+        <%= link_to_custom image_tag(asset_path("new_css_v1/main_26.gif")),c_action,:remote=>true,:id=>"5",:class=>"main_menu_link" %><br/>
+        <%= link_to_custom "设置",c_action,:remote=>true,:id=>"55",:class=>"main_menu_link" %>
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td height="40">
+      <div align="center">
+        <%= link_to_custom image_tag(asset_path("new_css_v1/main_26.gif")),c_action,:remote=>true,:id=>"6",:class=>"main_menu_link" %><br/>
+        <%= link_to_custom "订单管理",c_action,:remote=>true,:id=>"66",:class=>"main_menu_link" %>
+      </div>
+    </td>
+    <td height="40">
+      <div align="center">
+        <%#= link_to_custom image_tag(asset_path("new_css_v1/main_26.gif")),c_action,:remote=>true,:id=>"7",:class=>"main_menu_link" %><br/>
+        <%#= link_to_custom "查询统计",c_action,:remote=>true,:id=>"77",:class=>"main_menu_link" %>
+      </div>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".main_menu_link")
+                .bind("ajax:success", function(evt, data, status, xhr){
+                    var id = $(this).attr("id");
+                    if(id.length == 2){
+                        id = id.slice(0,1);
+                    };
+                    showTabs(id,data);
+                })
+    })
+</script>

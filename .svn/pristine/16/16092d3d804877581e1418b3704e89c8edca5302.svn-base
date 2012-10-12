@@ -1,0 +1,54 @@
+# encoding: utf-8
+module CategoriesHelper
+
+  def category_form_vars
+    @description_label = "备注"
+    @need_verify_label = "是否需要审核"
+    case params[:cate]
+      when "public_store"
+        @name_label = "公海库"
+      when "client_grade"
+        @name_label = "客户类别"
+      when "personal_store"
+        @name_label = "个人客户库"
+      when "shield"
+        @name_label = "屏蔽字段"
+        @description_label = "需要在搜索模糊搜索时排除的词，不同词用英文逗号隔开"
+      when "client_origin"
+        @name_label = "客户来源"
+      when "client_field"
+        @name_label = "新建客户时必填的字段"
+        @description_label = "新建客户时必填的字段"
+      when "contact_nature"
+        @name_label = "联系人性质"
+      when "contact_way"
+        @name_label = "联系方式"
+      when "serve_way"
+        @name_label = "服务方式"
+      when "introduce_product"
+        @name_label = "介绍的产品"
+      when "introduce_server"
+        @name_label = "介绍的服务"
+      when "interest_point"
+        @name_label = "兴趣点"
+      when "dissent_point"
+        @name_label = "异议点"
+      when "protect_client_count"
+        @name_label = "保护客户数量设置"
+      when "product_category"
+        @name_label = "产品类别"
+      when "contact_result"
+        @name_label = "联系结果"
+        @need_verify_label = "联系结果是否为有效"
+      when "asset_cate"
+        @name_label = "资产类型"
+        @description_label = "资产编号前缀"
+      #@need_verify_label = "联系结果是否为有效"
+      when "purchase_way"
+        @name_label = "采购方式"
+        #@need_verify_label = "联系结果是否为有效"
+      else
+    end
+  end
+
+end

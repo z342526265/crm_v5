@@ -1,0 +1,51 @@
+<% @serve_records.each do |serve_record| %>
+    <div>=============================================================</div>
+    <table>
+      <tr>
+        <td>联系时间：<%=time_format serve_record.created_at %></td>
+        <td>联系人：<%= serve_record.contact_person_name %></td>
+      </tr>
+      <tr>
+        <td>订单编号：<%= serve_record.order_number %></td>
+        <td>联系方式：<%= serve_record.contact_way_name %></td>
+      </tr>
+      <tr>
+        <td>联系结果：<%= serve_record.contact_result %></td>
+      </tr>
+      <tr>
+        <td colspan="2">联系内容：<%=auto_link serve_record.content,:html=>{:target=>"_blank"} %></td>
+      </tr>
+    </table>
+
+    <div class="object_luyin">
+      <div>
+        <%= button_to "播放录音",{:controller=>"mini_clients",:action=>"play_record",:serve_id=>serve_record,:cate=>"serve"},:remote=>true %>
+      </div>
+    </div>
+
+<% end %>
+
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".button_to")
+                .bind("ajax:beforeSend",function(){
+                   createPrintDIV();
+                })
+                .bind("ajax:success",function(evt,data){
+
+                    if (data.length == 0){
+                        alert("找不到对应的录音！");
+                    }else{
+                        for(var i = 0;i<data.length;i++){
+                            var txt = "<embed height='17px' standby='加载中...' width='100px' name='plugin' type='audio/x-wav' src='http://192.168.1.2/"+data[i]+"' /> "
+                            $(this).parent("div").parent("div").append(txt);
+                        }
+                        $(this).parent("div").remove();
+                    }
+//                    var txt = "<embed height='17px' standby='加载中...' width='100px' name='plugin' type='audio/x-wav' src='http://192.168.1.2/"+data+"' /> "
+//                    $(this).parent("div").replaceWith(txt);
+                    $("#sk").remove();
+                })
+    })
+</script>

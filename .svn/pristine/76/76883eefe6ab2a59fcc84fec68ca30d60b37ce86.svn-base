@@ -1,0 +1,64 @@
+<% # encoding: utf-8 %>
+<%= form_for(@order_item,:url=>{:controller=>"orders",:action=>"ajax_update_order_item",:order_item_id=>@order_item,:mini_client_id=>@mini_client},:remote=>true,:html=>{:id=>"ajax_update_order_item"+@mini_client.id.to_s}) do |f| %>
+
+    <table id="order_item_form_table" width="600px">
+      <tr>
+        <th width="85">选择产品</th>
+        <th width="80">总价</th>
+        <th width="85">已收款项</th>
+        <th width="85">服务开始时间</th>
+        <th width="85">服务结束时间</th>
+      </tr>
+      <tr>
+        <td><%= f.select :product_id,@products.map{|p|[p.name,p.id]},:class=>"liiii" %></td>
+        <td><%= f.text_field :contract_amount,:class=>"liiii" %></td>
+        <td><%= f.text_field "received_amount",:class=>"liiii" %></td>
+        <td><%= f.text_field "serve_start_at",:class=>"time liiii" %></td>
+        <td><%= f.text_field "serve_end_at",:class=>"time liiii" %></td>
+      </tr>
+      <tr>
+        <td colspan="5"> <%= f.submit "提交" %></td>
+      </tr>
+    </table>
+
+<% end %>
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        var client_id = '<%= @mini_client.id %>'
+        $('#ajax_update_order_item'+client_id)
+                .bind("ajax:beforeSend",function(evt,xhr,settings){
+                    var v1 = $("#order_item_contract_amount").val();
+                    var v2 = $("#order_item_received_amount").val();
+                    var v4 = $("#order_item_end_at").val();
+                    if (v1=="" || v2==""){
+                        alert("总价和已收款项都不能为空！");
+                        return false;
+                    }else {
+                        v1 = parseFloat(v1);
+                        v2 = parseFloat(v2);
+                        if(v1 < v2){
+                            alert("总价不能小于已收款项！");
+                            return false;
+                        }else{
+                            if (v4 == ""){
+                                alert("服务到期时间不能为空！")
+                                return false;
+                            }
+                        }
+                    }
+                    if(!confirm("确认提交修改？")){
+                        return false;
+                    }
+                })
+                .bind("ajax:success", function(evt, data, status, xhr){
+//                    $("#order_show_pop"+client_id).hide(500);
+//                    alert(data);
+                    $("#"+'<%= "show-tab-4"+@mini_client.id.to_s %>').html(data);
+                    alert("修改成功！");
+                })
+    })
+</script>
+
+
+
+

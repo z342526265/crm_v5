@@ -1,0 +1,37 @@
+<% #encoding: utf-8 %>
+<div class="">
+  <%= form_tag do %>
+      <fieldset>
+        <legend>修改账号</legend>
+
+        <div>
+          <label for="login">管理员密码:</label>
+          <%= password_field_tag :admin_password %>
+        </div>
+
+        <div>
+          <label for="login">原账号:</label>
+          <%= text_field_tag :old_login %>
+        </div>
+
+        <div>
+          <label for="login">新账号:</label>
+          <%= text_field_tag :new_login %>
+        </div>
+
+        <div>
+          <label for="password">新密码:</label>
+          <%= password_field_tag :new_password %>
+        </div>
+
+        <div>
+          <label for="password_confirmation">确认新密码:</label>
+          <%= password_field_tag :new_password_confirmation %>
+        </div>
+        <%= hidden_field_tag "id",params[:id] %>
+        <div>
+          <%= submit_tag "提交" %>
+        </div>
+      </fieldset>
+  <% end %>
+</div>

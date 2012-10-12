@@ -1,0 +1,70 @@
+<% # encoding: utf-8 %>
+<h1>基础客户列表</h1>
+
+<%= form_tag({:action=>"index"}) do %>
+    <%= label :search,:name_like,"客户名称：" %><%= text_field(:search,:name_like) %>
+    <%= submit_tag "搜索" %>
+<% end %>
+
+<%= link_to_custom "导出公海",:action=>"index",:format=>"csv" %>
+
+<table class="gonghaitableys" style="line-height: 30px;">
+  <tr>
+    <th><input type="checkbox" name="chk_all" id="chk_all" />全选/取消全选</th>
+    <th>客户名称</th>
+    <th>公司网址</th>
+    <th>所在公海</th>
+    <th>行业</th>
+    <th>主营业务</th>
+    <th>主要客户群</th>
+    <th>营业范围</th>
+    <th>市场区域</th>
+    <th>其他信息</th>
+    <th colspan="1">操作</th>
+  </tr>
+  <%= form_tag "/clients/multi_process" do %>
+      <% @clients.each do |client| %>
+          <tr>
+            <td><%= check_box_tag "client_ids[]", client.id %><%= client.number %></td>
+            <td><%= client.name %></td>
+            <!--<td><%#= link_to_custom client.name, {:controller=>"clients",:action=>"show",:id=>client} %></td>-->
+            <td><%= client.web_url %></td>
+            <td><%= client.public_store_names_text %></td>
+            <td><%= client.trade %></td>
+            <td><%= client.main_business %></td>
+            <td><%= client.main_client_base %></td>
+            <td><%= client.business_rang %></td>
+            <td><%= client.business_area %></td>
+            <td><%= client.description %></td>
+            <td><%= link_to_custom '删除', {:controller=>"clients",:action=>"destroy",:id=>client},:confirm=>"删除请慎重，该客户下已存在联系人、订单等信息会同时删除，确认？",:method=>:delete %></td>
+          </tr>
+      <% end %>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td colspan="2">
+          <h4>把选中客户分配到公海：</h4>
+        </td>
+          <td colspan="2">
+            <%= select_tag "public_store_id",options_from_collection_for_select(PublicStore.all,"id","name") %>
+            <%= submit_tag "提交" %>
+          </td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+  <% end %>
+</table>
+<%= paginate @clients %>
+<br />
+
+<script type="text/javascript">
+    $("#chk_all").click(function(){
+        var v = false
+        if($(this).attr("checked")){
+            v = true
+        }
+        $("input[name='client_ids[]']").attr("checked",v);
+    });
+</script>

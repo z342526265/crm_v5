@@ -1,0 +1,58 @@
+# encoding: utf-8
+class OrderItem < ActiveRecord::Base
+  # attr_accessible :title, :body
+
+  include SetCreatedUser
+  include CustomAssociationMethod
+
+  belongs_to :order
+  belongs_to :product
+  has_many :paid_items
+
+  validates_presence_of :product_id
+
+
+  def serve_status
+    self.serve_end_at > Date.today
+  end
+
+  def serve_status_text
+    self.serve_status ? "正常服务中..." : "服务已到期"
+  end
+
+  def self.custom_build(order,params)
+    b = params.values.first.length
+    result = []
+    for i in (0..b-1)
+      h = {}
+      params.keys.each do |k|
+        h[k]=params[k][i]
+      end
+      result << h
+    end
+    order.order_items.create!(result)
+  end
+
+  before_save :set_data
+  after_save :set_order_data
+  private
+
+  def set_data
+    self.owe_amount = self.contract_amount - self.received_amount
+  end
+
+  #设置订单的合同金额
+  #设置订单的已收金额
+  def set_order_data
+    contract_amount = self.order.order_items.sum{|item|item.contract_amount}
+    received_amount = self.order.order_items.sum{|item|item.received_amount}
+    serve_end_at = self.serve_end_at
+    owe_amount = contract_amount - received_amount
+    self.order.update_attributes(:contract_amount=>contract_amount,
+                                 :received_amount=>received_amount,
+                                 :owe_amount=>owe_amount,
+                                 :serve_end_at=>serve_end_at
+    )
+  end
+
+end

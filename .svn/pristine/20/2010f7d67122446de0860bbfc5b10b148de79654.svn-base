@@ -1,0 +1,24 @@
+<h3>延期申请</h3>
+<table>
+  <tr>
+    <td>
+      开发步骤：<%= @develop_step.name %>
+    </td>
+    <td>
+      申请原因：<%= @apply_delay_complete.apply_delay_reason %>
+    </td>
+    <td>
+      计划完成日期：<%= @apply_delay_complete.apply_delay_date %>
+    </td>
+  </tr>
+</table>
+
+<div >
+  <h3>操作</h3>
+  <div id="delay_check_links">
+    <%= link_to_custom "驳回",{:controller=>"order_develop_steps",:action=>"disagree_delay",:order_id=>@order,:develop_step_id=>@develop_step},{:remote=>true,:id=>"disagree_delay",:develop_step_id=>@develop_step.id,:confirm=>"确认驳回？"} %>
+    <%= link_to_custom "同意并重新设置",{:controller=>"order_develop_steps",:action=>"agree_delay",:order_id=>@order,:develop_step_id=>@develop_step},{:remote=>true,:id=>"agree_delay"} %>
+  </div>
+</div>
+
+<div id='update_develop_steps'></div>

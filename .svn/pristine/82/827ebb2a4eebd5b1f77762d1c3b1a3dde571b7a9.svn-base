@@ -1,0 +1,24 @@
+# encoding: utf-8
+namespace :permission do
+  desc "权限的相关操作"
+
+
+  task(:update_manager_role=>:environment) do
+    role = Role.find_by_name("总经理")
+    role.update_attributes(:permissions=>Permission.all)
+    puts "增加成功！"
+  end
+
+  task(:add=>:environment) do
+    p36 = Permission.create({:name=>"订单相关审核",
+                             :c_actions=>[
+                                 "orders-check",
+                             ],:cate => 36})
+
+
+    role = Role.find_by_name("总经理")
+    role.update_attributes(:permissions=>Permission.all)
+
+    puts "success...."
+  end
+end

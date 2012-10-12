@@ -1,0 +1,45 @@
+<% # encoding: utf-8 %>
+<div id="ajax_index_table_v3">
+      <%= render :partial => "/mini_clients/ajax_index/ajax_index_table_v3" %>
+</div>
+
+<div id="smart-paginator" style="float:right;" ></div>
+<br />
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#chk_all").click(function(){
+            var v = false
+            if($(this).attr("checked")){
+                v = true
+            }
+            $("input[name='client_ids[]']").attr("checked",v);
+        });
+
+        var mini_clinet_count = '<%= @mini_clients_count %>'
+        var every_page_count = '<%= @every_page_count %>'
+        $('#smart-paginator').smartpaginator({
+            totalrecords: mini_clinet_count,
+            recordsperpage: every_page_count,
+            initval:1 ,
+            next: '下一页',
+            prev: '上一页',
+            first: '第一页',
+            last: '尾页',
+            theme:   'green',
+            onchange: onChange
+        })
+
+    });
+    function onChange(newPageValue) {
+        var url = "/mini_clients/ajax_index_table_v3"+"?page="+newPageValue;
+        createPrintDIV();
+        $.get(url,function(data){
+            $("#ajax_index_table_v3").html(data);
+            $("#sk").remove();
+        });
+    };
+</script>

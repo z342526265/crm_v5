@@ -1,0 +1,79 @@
+<table width="100%" align="left" class="kkhhjbx" >
+  <tr bgcolor="#CCFF66">
+    <td colspan="3" align="left" style="font-weight: bold; font-size: 14px;">
+      &nbsp;&nbsp;基本信息
+    </td>
+    <td>
+    </td>
+  </tr>
+  <tr align="left">
+    <td width="25%">
+      <strong>客户名称:</strong>
+      <%= client.name %>
+    </td>
+    <td width="25%">
+      <strong> 公司网站:</strong>
+      <%=auto_link client.web_url,:html=>{:target=>"_blank"} %>
+    </td>
+    <td width="25%">
+      <strong>  地址: </strong>
+      <%= client.address %>
+    </td>
+    <td width="25%">
+      <strong> 行业: </strong>
+      <%= client.trade %>
+    </td>
+  </tr>
+  <tr align="left">
+    <td width="25%">
+      <strong>企业法人:  </strong>
+      <%= client.legal_person %>
+    </td>
+    <td width="25%">
+      <strong> 注册资金:  </strong>
+      <%= client.fund %>
+    </td>
+    <td width="50%" colspan="2">
+      <strong> 成立日期: </strong>
+      <%= client.found_date %>
+    </td>
+  </tr>
+  <tr align="left">
+    <td colspan="2" width="50%">
+      <strong> 主要业务范围:   </strong>
+      <%= client.main_business %>
+    </td>
+    <td colspan="2" width="50%">
+      <strong> 主要客户群: </strong>
+      <%= client.main_client_base %>
+    </td>
+  </tr>
+  <tr align="left">
+    <td colspan="2" width="50%">
+      <strong> 市场范围:   </strong>
+      <%= client.business_rang %>
+    </td>
+    <td colspan="2" width="50%">
+      <strong> 市场区域:    </strong>
+      <%= client.business_area %>
+    </td>
+  </tr>
+  <tr align="left">
+    <td colspan="4" width="100%">
+      <strong> 其他: </strong>
+      <%= client.description %>
+    </td>
+  </tr>
+  <tr align="left">
+    <td colspan="4" width="100%">
+      <strong> 当前客户类别: </strong>
+      <%= client.client.grade_name %>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>联系人：</strong><%= client.contact %></td>
+    <td><strong>联系电话：</strong><%= client.tel %></td>
+    <td><strong>手机：</strong><%= client.mobile %></td>
+    <td><strong>邮箱：</strong><%= client.email %></td>
+  </tr>
+</table>

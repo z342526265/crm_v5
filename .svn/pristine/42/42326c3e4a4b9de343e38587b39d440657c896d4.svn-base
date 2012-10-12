@@ -1,0 +1,85 @@
+
+<table class="lxrjlysbju" style="margin-top: 10px;">
+  <tr bgcolor="#CCFF66"><td colspan="5" align="left">&nbsp;&nbsp;<strong>联系记录</strong></td>
+  <td align="right"><%= link_to_custom "添加联系记录",{:controller=>"mini_clients",:action=>"ajax_create_contact_record",:id=>@mini_client},:remote=>true,:id=>"add_contact_record_id"+@mini_client.id.to_s %></td>
+  </tr>
+  <tr bgcolor="#CCFF99">
+    <th>联系时间</th>
+    <th>联系人</th>
+    <th>类型</th>
+    <th>联系结果</th>
+    <th>小记内容</th>
+    <th>创建人</th>
+    <!--<th></th>-->
+  </tr>
+  <% @contact_records.each do |contact_record| %>
+    <tr>
+      <td><%=time_show_date contact_record.created_at %></td>
+      <td><%= contact_record.contact_person_name %></td>
+      <td><%= contact_record.contact_way_name %></td>
+      <td><%= contact_record.contact_result %></td>
+      <td><%= link_to_custom (contact_record.contact_result_id == 1 ? contact_record.contact_result_text : contact_record.invalid_contact_description),{:controller=>"mini_clients",:action=>"ajax_show_contact_records",:id=>@mini_client},:remote=>true,:class=>"ajax_show_contact_records"+@mini_client.id.to_s %></td>
+      <td><%= contact_record.created_user_name %></td>
+      <!--<td><%#= link_to_custom "查看","",:onclick=>"hide_or_display('#{contact_record.id.to_s}')",:remote=>true %></td>-->
+    </tr>
+  <% end %>
+</table>
+
+<!-- 弹出层 -->
+<div id='<%= "add_contact_record_pop"+@mini_client.id.to_s %>' style="background-color:#CCFF88; border: solid 1px #666666; position: absolute; display:none;
+        width:600px; left: 30%; top:25%;">
+
+  <table width="100%">
+      <tr>
+        <td align="center" style="font-size: 16px; line-height: 26px;">
+          <strong>联系记录</strong>
+        </td>
+        <td align="right"><a id='<%= "add_contact_record_pop_close"+@mini_client.id.to_s %>'><img src=<%= asset_path('new_css_v1/3-3main.gif') %> /></a></td>
+      </tr>
+    <tr>
+      <td colspan="2">
+  <div id='<%= "add_contact_record_div"+@mini_client.id.to_s %>' style="height:360px; overflow-y:scroll;text-align: center; background: #a6ff76" >
+    加载中......
+  </div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        //动画速度
+        var speed = 500;
+        var client_id = '<%= @mini_client.id %>';
+        //绑定事件添加联系记录
+        $("#add_contact_record_id"+client_id).click(function(event)
+        {
+            var url = this.href;
+            $.get(url,{"id": client_id},function(data){
+                $("#add_contact_record_div"+client_id).html(data);
+            })
+            event.stopPropagation();
+            $("#add_contact_record_pop"+client_id).toggle(speed);
+            event.preventDefault();
+        });
+
+        //绑定事件查看联系记录
+        $(".ajax_show_contact_records"+client_id).click(function(event)
+        {
+            var url = this.href ;
+            $.get(url,{},function(data){
+                $("#add_contact_record_div"+client_id).html(data);
+            })
+            event.stopPropagation();
+            $("#add_contact_record_pop"+client_id).toggle(speed);
+            event.preventDefault();
+        });
+        //单击空白区域隐藏弹出层
+        $("#add_contact_record_pop_close"+client_id).click(function(event) {
+            $("#add_contact_record_div"+client_id).html("加载中......");
+            $("#add_contact_record_pop"+client_id).hide(speed);
+        });
+    });
+</script>
+

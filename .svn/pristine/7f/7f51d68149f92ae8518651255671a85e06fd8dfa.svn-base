@@ -1,0 +1,66 @@
+<% # encoding: utf-8 %>
+
+<% case action_name
+     when "my_follow_clients"
+       search_action = "ajax_index_v2"
+     when "my_clients_of_had_orders"
+       search_action = "ajax_index_v3"
+     when "my_serve_clients"
+       search_action = "ajax_index_v4"
+     else
+       search_action = ""
+   end
+%>
+
+
+<%= form_for @search,:url=>{:controller=>"mini_clients",:action=>search_action},:html => {:remote=>true,:method=>:get,:id=>"ajax_search_index_v2"} do |f| %>
+    <%= f.label :client_name_or_client_number_like,"编号或名称" %>
+    <%= f.text_field :client_name_or_client_number_like,:class=>"_100px" %>&nbsp;
+    <% unless action_name == "my_follow_clients" %>
+        <%= f.label :serve_user1_id_eq,"客服" %>
+        <%= f.select :serve_user1_id_eq,User.subordinate_users(@current_user).map{|u|[u.name,u.id]},{:include_blank=>true},:class=>"user_select" %>&nbsp;
+    <% end %>
+    <%= f.label :user_id_eq,"业务员" %>
+    <%= f.select :user_id_eq,User.subordinate_users(@current_user).map{|u|[u.name,u.id]},{:include_blank=>true},:class=>"user_select" %>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    名称↑<%= radio_button_tag "sort","clients.name ASC" %>&nbsp;
+    名称↓<%= radio_button_tag "sort","clients.name DESC" %>&nbsp;
+    编号↑<%= radio_button_tag "sort","clients.number ASC" %>&nbsp;
+    编号↓<%= radio_button_tag "sort","clients.number DESC" %>&nbsp;
+    <% if action_name == "my_serve_clients" %>
+        客服↑<%= radio_button_tag "sort","mini_clients.serve_user1_id ASC" %>&nbsp;
+        到期时间↑<%= radio_button_tag "sort","mini_clients.serve_due_time_first ASC" %>&nbsp;
+        到期时间↓<%= radio_button_tag "sort","mini_clients.serve_due_time_first DESC" %>&nbsp;
+    <% end %>
+    <%= f.submit "搜索" %>
+<% end %>
+
+<div class="main">
+  <div class="tabBar">
+    <ul id="tab">
+    </ul>
+  </div>
+  <div class="window" id="win">
+  </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function(){
+
+        $("#ajax_search_index_v2")
+                .bind("ajax:beforeSend", function(evt, xhr, settings){
+                    createPrintDIV();
+                })
+                .bind("ajax:success", function(evt, data, status, xhr){
+                    $("#winmain").html(data);
+                    $("#sk").remove();
+                })
+
+        <% if action_name == "my_follow_clients" %>
+        inity("/mini_clients/ajax_index_v2");
+        <% elsif action_name == "my_clients_of_had_orders" %>
+        inity("/mini_clients/ajax_index_v3");
+        <% elsif action_name == "my_serve_clients" %>
+        inity("/mini_clients/ajax_index_v4");
+        <% end %>
+    })
+</script>

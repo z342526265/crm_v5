@@ -1,0 +1,167 @@
+<% # encoding: utf-8 %>
+<h1>编辑客户</h1>
+
+<%= form_for(@mini_client,:url=>{:controller=>"mini_clients",:action=>'ajax_update_client',:id=>@mini_client},:remote=>true,:html=>{:id=>"ajax_update_client_form"}) do |f| %>
+    <%= f.error_messages %>
+    <table class="lingyg" width="100%" border="0" style="line-height: 28px;">
+      <tr class="field" width="100%">
+        <td colspan="4">
+          <table class="lingyg1"  width="100%" style=" border:1px solid #cccccc;line-height: 28px; margin-top: 5px;">
+            <tr><td colspan="4" align="left" style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;必选客户信息(*)</td></tr>
+            <tr>
+              <td><%= f.label :nature_id,"客户性质" %></td>
+              <td align="left"><%= f.select :nature_id,Category.find_all_by_cate("nature").map{|n|[n.name,n.id]} %></td>
+              <td><%= f.label :grade_id,"客户分类" %></td>
+              <td align="left"><%= f.select :grade_id,Category.where(:need_verify=>false).find_all_by_cate("client_grade").map{|n|[n.name,n.id]} %></td>
+            </tr>
+            <tr>
+              <td><%= f.label :origin_id,"客户来源" %></td>
+              <td align="left"><%= f.select :origin_id,Category.find_all_by_cate("client_origin").map{|n|[n.name,n.id]} %></td>
+              <td><%= f.label :district_id,"客户地区" %></td>
+              <td align="left"><DIV id="district_select"></DIV></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="2" width="48%" valign="top">
+          <table width="100%" class="lingyg1" style="border:1px solid #cccccc;line-height: 28px; margin-top: 5px;">
+            <tr><td colspan="2" align="left" style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;基本信息(*为必填)</td></tr>
+            <tr>
+              <td><%= f.label :name,"客户名称" %></td>
+              <td align="left"><%= f.text_field :name %><%= required_tag %>
+                <%= link_to_custom "模糊搜索",{:controller=>"mini_clients",:action=>"ajax_search"},:remote=>true,:id=>"btnShow" %>
+            </tr>
+            <tr>
+              <td><%= f.label :web_url,"公司网站" %></td>
+              <td align="left"><%= f.text_field :web_url %></td>
+            </tr>
+            <tr>
+              <td><%= f.label :trade,"行业" %></td>
+              <td align="left"><%= f.text_field :trade %></td>
+            </tr>
+            <tr>
+              <td style="padding-bottom: 10px;"><%= f.label :address,"地址" %></td>
+              <td align="left"><%= f.text_field :address %></td>
+            </tr>
+          </table>
+        </td>
+        <td colspan="2" valign="top" width="48%" style="padding-left: 5px;">
+          <table class="lingyg1" style=" border:1px solid #cccccc;line-height: 28px; margin-top: 5px;">
+            <tr><td colspan="2" align="left" style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;详细信息</td></tr>
+            <tr>
+              <td><%= f.label :legal_person,"企业法人" %></td>
+              <td align="left"><%= f.text_field :legal_person %></td>
+            </tr>
+            <tr>
+              <td><%= f.label :fund,"注册资金" %></td>
+              <td align="left"><%= f.text_field :fund %></td>
+            </tr>
+            <tr>
+              <td><%= f.label :found_date,"成立日期" %></td>
+              <td align="left"><%= f.text_field :found_date,:class=>"time" %></td>
+            </tr>
+            <tr>
+              <td><%= f.label :main_business,"主营业务" %></td>
+              <td align="left"><%= f.text_field :main_business %></td>
+            </tr>
+            <tr>
+              <td><%= f.label :main_client_base,"主要客户群" %></td>
+              <td align="left"><%= f.text_field :main_client_base %></td>
+            </tr>
+            <tr>
+              <td><%= f.label :business_rang,"营业范围" %></td>
+              <td align="left"><%= f.text_field :business_rang %></td>
+            </tr>
+            <tr>
+              <td><%= f.label :business_area,"营业区域" %></td>
+              <td align="left"><%= f.text_field :business_area %></td>
+            </tr>
+            <tr>
+              <td><%= f.label :net_spread,"网络推广情况" %></td>
+              <td align="left"><%= f.text_field :net_spread %></td>
+            </tr>
+            <tr>
+              <td style="padding-top:5px;"><%= f.label :description,"备注" %></td>
+              <td style="padding-top:5px;" align="left"><%= f.text_area :description,:cols=>60,:rows=>2,:class=>"hhoolk" %></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr class="actions">
+        <td colspan="4">
+          <%= f.submit "提交" %>
+        </td>
+      </tr>
+    </table>
+<% end %>
+
+<!-- 弹出层 -->
+<div id="divPop" style="background-color:#CCFF88; border: solid 1px #666666; position: absolute; display:none;
+        width:600px; height:auto; left: 30%;top:25%;">
+  <table width="100%">
+    <tr>
+      <td align="center" style="font-size: 16px; line-height: 26px;">
+        <strong>搜索信息列表</strong>
+      </td>
+      <td align="right"><a id="close"><img src=<%= asset_path('new_css_v1/3-3main.gif') %> /></a></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <div id="search_result_callback" style="text-align: center; background: #a6ff76" >
+          <p>正在搜索...</p>
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        // 输入框日期弹出框
+        $("#mini_client_found_date").calendar();
+        //地区选择
+        $("#district_select").json2select(areaJson,["河南省","南阳市","卧龙区"]);
+        //模糊搜索弹出框
+        //动画速度
+        var speed = 500;
+        $("#btnShow").click(function(event)
+        {
+            var search_val = $("#mini_client_name").val();
+            if (search_val == ""){
+                alert("客户名称不能为空！");
+                return false;
+            }
+
+            $.get("/mini_clients/ajax_search", { "name":search_val },function (data, success) {
+                jQuery("#search_result_callback").html(data)
+            });
+
+            //取消事件冒泡
+            event.stopPropagation();
+            //动画显示
+            $("#divPop").toggle(speed);
+            event.preventDefault();
+        });
+
+        //单击空白区域隐藏弹出层
+        $("#close").click(function(event) { $("#divPop").hide(speed) });
+
+
+        $('#ajax_update_client_form')
+                .bind("ajax:beforeSend", function(evt, xhr, settings){
+                    if(!confirm("确认提交？")){
+                        return false;
+                    }
+                })
+                .bind("ajax:success", function(evt, data, status, xhr){
+                    var mini_client_id = '<%= @mini_client.id.to_s %>'
+                    $("#"+'show-tab-a'+mini_client_id).html(data);
+                    alert("保存成功！")
+                })
+
+
+
+    });
+</script>

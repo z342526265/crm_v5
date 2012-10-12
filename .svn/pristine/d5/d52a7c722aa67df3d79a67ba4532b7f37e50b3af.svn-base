@@ -1,0 +1,28 @@
+<td><%= check_box_tag "client_ids[]", client.id %><%= client.number %></td>
+<% tab_name = (client.name.gsub(@shield_fields_regular,"")[0,6]) rescue "-" %>
+<td><a href="#" name="<%= client.id %>" onclick="showTab(this,'/mini_clients/ajax_show?id=<%= client.id %>','<%= tab_name %>');return false;"><%= tab_name %></a> </td>
+<td><%=truncate client.client.grade_text ,:length=>20 %></td>
+<td><%= client.serve_due_time_first.to_s %></td>
+<td><%= client.serve_records_count %></td>
+<td><%= client.update_news_records_count %></td>
+<td><%= client.visit_home_records_count %></td>
+<% serve_record = client.serve_records.first %>
+<td><%= time_format((serve_record.present? ? serve_record.created_at : "不存在服务记录")) %></td>
+<td><%= truncate((serve_record.present? ? serve_record.contact_result_text : "不存在服务记录"),:length=>25) %></td>
+<td><%= client.serve_user1_name %></td>
+<!--<td><%#= client.serve_user2_name %></td>-->
+<% unless client.is_losed? %>
+    <td>
+      <%= (link_to_custom "失效",{:controller=>"mini_clients",:action=>"ajax_lose",:mini_client_id=>client},{:remote=>true,:class=>"shixiao",:method=>:post,:confirm=>"确认该客户已失效？"}) %>
+    </td>
+    <td colspan="3">
+      <%= form_tag "/mini_clients/distribute_client_to_server?mini_client_id=#{client.id}",:remote=>true,:class=>"distribute_client_to_server" do %>
+          分配给：<%= select_tag "user_id",options_from_collection_for_select(User.subordinate_users(@current_user), "id", "name"),:class=>"user_select" %>
+          <%= submit_tag "提交" %>
+      <% end %>
+    </td>
+<% else %>
+    <td colspan="4">
+      已失效
+    </td>
+<% end %>

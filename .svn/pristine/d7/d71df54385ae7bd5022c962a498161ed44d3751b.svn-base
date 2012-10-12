@@ -1,0 +1,30 @@
+<% # encoding: utf-8 %>
+
+<%= f.error_messages %>
+<center>
+  <div id="juesem">
+    <%= f.label :name,"角色名称" %> &nbsp;&nbsp;
+    <%= f.text_field :name,:class=>"jusewenben" %>
+  </div>
+  <div class="bzsm">
+    <%= f.label :description ,"备注" ,:class=>"kk" %> &nbsp;&nbsp;
+    <%= f.text_area :description,:cols=>20,:rows=>3,:class=>"kk" %> <br />
+  </div>
+  <div id="juesexx">
+    <%= f.label :permission ,"包含权限" %>
+  </div>
+  <div id="xuanxlb">
+    <% @permissions.each do |p| %>
+         <span class="qxxx">
+           <%= check_box_tag "role[permission_ids][]", p.id,@role.permissions.include?(p) %>
+           <%= p.name %>
+        </span>
+    <% end %>
+  </div>
+
+
+
+  <div class="actions" style="clear: both;">
+    <%= f.submit "提交" %>
+  </div>
+</center>

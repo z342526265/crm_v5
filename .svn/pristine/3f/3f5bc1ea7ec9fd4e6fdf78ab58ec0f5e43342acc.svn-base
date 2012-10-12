@@ -1,0 +1,19 @@
+<% @serve_records.each do |serve_record| %>
+    <div>=============================================================</div>
+    <table>
+      <tr>
+        <td>联系时间：<%=time_format serve_record.created_at %></td>
+        <td>联系人：<%= serve_record.contact_person_name %></td>
+      </tr>
+      <tr>
+        <td>订单编号：<%= serve_record.order_number %></td>
+        <td>联系方式：<%= serve_record.contact_way_name %></td>
+      </tr>
+      <tr>
+        <td>联系结果：<%= serve_record.contact_result %></td>
+      </tr>
+      <tr>
+        <td colspan="2">联系内容：<%=auto_link serve_record.content,:html=>{:target=>"_blank"} %></td>
+      </tr>
+    </table>
+<% end %>

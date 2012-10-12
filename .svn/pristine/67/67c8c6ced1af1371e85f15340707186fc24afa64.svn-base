@@ -1,0 +1,29 @@
+<% @contact_records.each do |contact_record| %>
+    <div>==============================================================</div>
+    <table>
+      <tr>
+        <td>联系时间：<%=time_format contact_record.created_at %></td>
+        <td>联系人：<%= contact_record.contact_person_name %></td>
+        <td>联系方式：<%= contact_record.contact_way_name %></td>
+      </tr>
+      <tr>
+        <td>联系结果：<%= contact_record.contact_result %></td>
+     <% if contact_record.contact_result_id == 0 %>
+        <td>联系结果：<%= contact_record.invalid_contact_description %></td>
+      </tr>
+     <% else %>
+        <td>创建人：<%= contact_record.created_user_name %></td>
+      </tr>
+      <tr>
+        <td>介绍的产品：<%= contact_record.introduce_product %></td>
+        <td>介绍的服务：<%= contact_record.introduce_server %></td>
+        <td>兴趣点：<%= contact_record.interest_point %></td>
+      </tr>
+      <tr>
+        <td>异议点：<%= contact_record.dissent_point %></td>
+        <td>跟进思路：<%= contact_record.follow_ideas %></td>
+        <td>备注：<%= contact_record.description %></td>
+      </tr>
+     <% end %>
+    </table>
+<% end %>

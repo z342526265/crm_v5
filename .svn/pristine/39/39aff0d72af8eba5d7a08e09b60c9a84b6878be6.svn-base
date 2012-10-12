@@ -1,0 +1,16 @@
+<%# encoding: utf-8%>
+
+  <div class="field">
+    <%= f.label :name,"岗位名称" %><br />
+    <%= f.text_field :name %>
+  </div>
+  <!--<div class="field">-->
+    <%#= f.label :department_id,"所属部门" %><br />
+    <!--<%#= f.select :department_id,Department.where(:cate=>2).collect {|d|[d.name,d.id]} %>-->
+  <!--</div>-->
+
+  <div class="field">
+    <%= f.label :description ,"岗位描述"%><br />
+    <%= f.text_area :description,:cols=>20,:rows=>3 %>
+  </div>
+

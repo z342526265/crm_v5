@@ -1,0 +1,49 @@
+<%= form_for(@user,:url=>{:controller => "users",:action => "basic_information",:id=>@user},:html => {:method=>:put } ) do |f| %>
+
+    <%= f.error_messages %>
+
+<div>
+  <%= f.label :department_id,"部门" %><br />
+  <%= f.select :department_id,Department.all.collect{|d|[d.name,d.id]} %>
+</div>
+<div>
+  <%= f.label :position_id,"岗位" %><br />
+  <%= f.select :position_id,Position.all.collect{|d|[d.name,d.id]} %>
+</div>
+<div>
+  <%= f.label :roles,"角色" %><br />
+  <table>
+    <tr>
+      <% @roles.each_with_index do |r,i| %>
+          <td>
+
+            <%= check_box_tag "user[role_ids][]", r.id,@user.roles.map(&:id).include?(r.id) %><%= r.name %>
+          </td>
+      <% end %>
+    </tr>
+  </table>
+</div>
+<div>
+  <%= f.label :tel,"办公电话" %><br />
+  <%= f.text_field :tel %>
+</div>
+<div>
+  <%= f.label :qq ,"办公QQ号码"%><br />
+  <%= f.text_field :qq %>
+</div>
+<div>
+  <%= f.label :enter_date,"入职日期" %><br />
+  <%= f.text_field :enter_date ,:class=>'time' %>
+</div>
+
+<div><%= f.submit "更新" %></div>
+<% end %>
+
+<%= link_to_custom "返回", :back %>
+
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        // 输入框日期弹出框
+        $("#user_enter_date").calendar();
+    });
+</script>

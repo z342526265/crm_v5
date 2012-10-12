@@ -1,0 +1,69 @@
+<p><h2>资产列表</h2></p>
+<div>
+  <%= link_to_custom "新增固定资产",{:controller=>"assets",:action=>"create"} %>
+</div>
+<div>
+  <%= form_for @search, :url => {:controller=>"assets",:action=>"index"},:html => {:method => :get} do |f| %>
+      <!--闲置资产：<%#= check_box_tag "is_used" %>&nbsp;-->
+      <!--闲置资产：<%#= check_box_tag "is_used" %>&nbsp;-->
+      <%= f.label :name_or_number_like,'名称或编号' %>
+      <%= f.text_field :name_or_number_like,:class=>"user_select" %>&nbsp;&nbsp;&nbsp;
+      <%= f.label :asset_cate_id_eq,'类型' %>
+      <%= f.select :asset_cate_id_eq,Category.find_all_by_cate("asset_cate").map{|u|[u.name,u.id]},{:include_blank=>true},{:class=>"user_select"} %>&nbsp;&nbsp;&nbsp;
+      <%= f.label :user_id_eq,'使用人' %>
+      <%= f.select :user_id_eq,asset_users,{:include_blank=>true},{:class=>"user_select"} %>&nbsp;&nbsp;&nbsp;
+      <%= f.label :supplier_id_eq,'供应商' %>
+      <%= f.select :supplier_id_eq,Supplier.all.map{|u|[u.name,u.id]},{:include_blank=>true},{:class=>"user_select"} %>&nbsp;&nbsp;&nbsp;
+      <%= f.submit "提交" %>
+  <% end %>
+</div>
+<table>
+
+  <tr>
+    <td>资产编号</td>
+    <td>资产名称</td>
+    <td>使用人</td>
+    <td>品牌</td>
+    <td>规格</td>
+    <td>供应商</td>
+    <td>采购日期</td>
+    <td>采购价格</td>
+    <td>采购人</td>
+    <td>采购方式</td>
+    <td>备注</td>
+    <td colspan="2">操作</td>
+  </tr>
+  <% @assets.each do |asset| %>
+      <tr>
+        <%= render :partial => "index_tr",:locals => {:asset=>asset} %>
+      </tr>
+  <% end %>
+</table>
+
+<div id="custom_popup"></div>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".asset_form_user")
+                .live("ajax:beforeSend", function(evt, xhr, settings){
+                    createPrintDIV();
+                })
+                .live("ajax:success",function(evt,data){
+                    var user_name = $(this).find("select").eq(0).children(":selected").text() || "-";
+//                        var txt = $(this).parent("td").prevAll("td").eq(-3).text();
+//                    $(this).parent("td").prevAll("td").eq(-3).text(user_name);
+                    $(this).parent("td").parent("tr").html(data);
+                    $("#sk").remove();
+                })
+
+        $(".asset_show")
+                .live("ajax:beforeSend", function(evt, xhr, settings){
+                    createPopup();
+                })
+                .live("ajax:success",function(evt,data){
+                    $("#popup_content").html(data);
+                })
+
+    })
+
+</script>

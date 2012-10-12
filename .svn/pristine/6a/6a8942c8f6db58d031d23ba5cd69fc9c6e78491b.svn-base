@@ -1,0 +1,133 @@
+# encoding: utf-8
+class UsersController < ApplicationController
+  before_filter :find_user,:only=>[:edit,:update,:show,:lock,:unlock,:basic_information,:family_information,:position_information]
+  def index
+    @users = User.subordinate_users(@current_user).page(params[:page]).per(@every_page_count)
+  end
+
+  def new
+    if @current_user.is_administrator?
+      @roles = Role.where(:cate=>[0,1,2])
+    elsif @current_user.roles.any?{|r|r.cate>1}
+      @roles = Role.where(:cate=>[0,1,2])
+    else
+      @roles = Role.where(:cate=>0)
+    end
+    @user = User.new
+  end
+
+  def create
+    if @current_user.is_administrator?
+      @roles = Role.where(:cate=>[0,1,2])
+    else
+      @roles = Role.where(:cate=>0)
+    end
+
+    @user = User.new(params[:user])
+    respond_to do |format|
+      if @user.save
+        flash[:notice] = "User #{@user.name} was successfully created."
+        format.html { redirect_to(:action=>'index') }
+      else
+        format.html { render :action => "new" }
+      end
+    end
+  end
+
+
+  def show
+  end
+
+  def edit
+    if @current_user.is_administrator?
+      @roles = Role.where(:cate=>[0,1,2])
+    elsif @current_user.roles.any?{|r|r.cate>1}
+      @roles = Role.where(:cate=>[0,1,2])
+    else
+      @roles = Role.where(:cate=>0)
+    end
+  end
+
+  def update
+    if @current_user.is_administrator?
+      @roles = Role.where(:cate=>[0,1,2])
+    else
+      @roles = Role.where(:cate=>0)
+    end
+    respond_to do |format|
+      if @user.update_attributes(params[:user])
+        format.html { redirect_to @user, notice: '信息成功被更新.' }
+        #format.json { head :no_content }
+      else
+        format.html { render action: "edit" }
+        #format.json { render json: @user.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  def unlock
+    if @user.update_attribute(:is_lock,false)
+      flash[:notice] = "#{@user.name} 账户已经解锁！"
+    else
+      flash[:alert] = "解锁失败,请重试！"
+    end
+    redirect_to :back
+  end
+
+  def lock
+    if @user.update_attribute(:is_lock,true)
+      flash[:notice] = "#{@user.name} 账户已经锁定！"
+    else
+      flash[:alert] = "锁定失败，请重试！"
+    end
+    redirect_to :back
+  end
+
+  def basic_information
+    return unless request.put?
+    respond_to do |format|
+      if @user.update_attributes(params[:user])
+        redirect_to :controller=>"users",:action=>"show",:id=>@user
+        flash[:notice] = "信息更新成功！"
+      else
+        format.html { render action: "basic_information" }
+      end
+    end
+  end
+
+  def family_information
+    return unless request.put?
+    respond_to do |format|
+      if @user.update_attributes(params[:user])
+        redirect_to :controller=>"users",:action=>"show",:id=>@user
+        flash[:notice] = "信息更新成功！"
+      else
+        format.html { render action: "family_information" }
+      end
+    end
+  end
+
+  def position_information
+    if @current_user.is_administrator?
+      @roles = Role.where(:cate=>[0,1,2])
+    else
+      @roles = Role.where(:cate=>0)
+    end
+
+    return unless request.put?
+    respond_to do |format|
+      if @user.update_attributes(params[:user])
+        redirect_to :controller=>"users",:action=>"show",:id=>@user
+        flash[:notice] = "信息更新成功！"
+      else
+        format.html { render action: "position_information" }
+      end
+    end
+  end
+
+
+  private
+  def find_user
+    @user = User.find(params[:id])
+  end
+end

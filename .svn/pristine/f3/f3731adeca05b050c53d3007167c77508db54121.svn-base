@@ -1,0 +1,10 @@
+<% #encoding: utf-8 %>
+<%= form_for(@role,:url=>{:action=>"protect_client_count_update",:id=>@role},:html=>{:method=>:post}) do |f| %>
+
+
+    角色名称：<%= @role.name %>
+    可保护数量：<%= f.text_field "protect_client_count" %>
+  <%= f.submit "提交" %>
+
+<% end %>
+<%= link_to_custom '返回', :controller=>"not_category_settings",:action=>"protect_client_count_index",:cate=>params[:cate] %>

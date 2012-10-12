@@ -1,0 +1,5 @@
+<h1>产品编辑</h1>
+<%= form_for(@product,:url=>{:controller=>"products",:action=>"update",:id=>@product}) do |f| %>
+    <%= render :partial => 'form',:locals=>{:f=>f} %>
+<% end %>
+<%= link_to_custom '返回', :controller=>"products",:action=>"index" %>

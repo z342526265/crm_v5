@@ -1,0 +1,76 @@
+
+
+<%= form_for(@user,:url=>{:controller => "users",:action => "basic_information",:id=>@user},:html => { :multipart => true,:method=>:put } ) do |f| %>
+
+    <%= f.error_messages %>
+
+    <div>
+      <%= f.label :name,"姓名" %><br />
+      <%= f.text_field :name %>
+    </div>
+    <div>
+      <%= f.label :email,"邮箱" %><br />
+      <%= f.email_field :email %>
+    </div>
+    <div>
+      <%= f.label :person_image,"头像" %>
+      <%= image_tag @user.person_image.url(:thumb) if @user.person_image %><br />
+      <%= f.file_field :person_image %>
+    </div>
+    <div>
+      <%= f.label :sex,"性别" %><br />
+      <%= f.select :sex ,[["男",true],["女",false]]%>
+    </div>
+    <div>
+      <%= f.label :mobile,"手机" %><br />
+      <%= f.text_field :mobile %>
+    </div>
+    <div>
+      <%= f.label :tel,"电话" %><br />
+      <%= f.text_field :tel %>
+    </div>
+    <div>
+      <%= f.label :birth ,"出生日期" %><br />
+      <%= f.text_field :birth,:class=>'time' %>
+    </div>
+    <div>
+      <%= f.label :nation,"民族" %><br />
+      <%= f.select :nation,User::NATION %>
+    </div>
+    <div>
+      <%= f.label :marriage_status,"婚姻状况" %><br />
+      <%= f.select :marriage_status,User::MARRIAGE_STATUS %>
+    </div>
+    <div>
+      <%= f.label :last_college ,"毕业院校"%><br />
+      <%= f.text_field :last_college %>
+    </div>
+    <div>
+      <%= f.label :edu_level,"最高学历" %><br />
+      <%= f.select :edu_level ,User::EDU_LEVEL %>
+    </div>
+    <div>
+      <%= f.label :identity_card ,"身份证号"%><br />
+      <%= f.text_field :identity_card %>
+    </div>
+    <div>
+      <%= f.label :identity_image ,"身份证扫描件"%>
+      <%= image_tag @user.identity_image.url(:thumb) if @user.identity_image %><br />
+      <%= f.file_field :identity_image %>
+    </div>
+    <div>
+      <%= f.label :current_address,"现住址" %><br />
+      <%= f.text_field :current_address %>
+    </div>
+
+    <div><%= f.submit "更新" %></div>
+<% end %>
+
+<%= link_to_custom "返回", :back %>
+
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        // 输入框日期弹出框
+        $("#user_enter_date,#user_birth,#user_father_birth,#user_mother_birth").calendar();
+    });
+</script>

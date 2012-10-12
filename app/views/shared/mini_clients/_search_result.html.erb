@@ -1,0 +1,28 @@
+<% # encoding: utf-8 %>
+<h1>客户列表</h1>
+
+<% if @clients.blank? %>
+    <p>没有搜索到重名的客户</p>
+<% else %>
+    <table width="100%" class="khsstanchu" bgcolor="#E1FFB9">
+      <tr>
+        <th>客户名称</th>
+        <th>公司网址</th>
+        <th>公海</th>
+        <th></th>
+        <th></th>
+      </tr>
+        <% @clients.each_with_index do |client,num| %>
+          <tr>
+            <td><%= client.name %></td>
+            <td><%= client.web_url %></td>
+            <td><%= client.public_stores_search_text %></td>
+            <td><%= link_to_custom '查看',{:controller=>"home",:action=>"blank_action"}, :onclick=>"hide_or_display(#{(num+1).to_s+'11'},#{(num+1).to_s+'31415926'});return false;",:remote=>true,:id=>(num+1).to_s+'31415926' %></td>
+          <tr>
+            <td colspan="5"><%= render :partial => "/shared/mini_clients/search_part1",:locals => {:client => client,:num=>num} %></td>
+          </tr>
+
+        <% end %>
+    </table>
+    <%#= paginate @clients if @clients.present? %>
+<% end %>

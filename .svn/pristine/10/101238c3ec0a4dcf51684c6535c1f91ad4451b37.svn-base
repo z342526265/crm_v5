@@ -1,0 +1,264 @@
+//定义showtab方法
+function showTabs(n) {
+    var i=0
+    var tabsNumber = 8;
+    var title_arr = new Array()
+    title_arr[0] = "我的工作台"
+    title_arr[1] = "员工"
+    title_arr[2] = "部门岗位"
+    title_arr[3] = "角色权限"
+    title_arr[4] = "客户管理"
+    title_arr[5] = "系统设置"
+    title_arr[6] = "订单管理"
+    title_arr[7] = "查询统计"
+    //根据传入的n值，id与n值相等的元素，显示出来，不相等的隐藏
+    setCookie("tabNum",n,3600,"/");
+//    alert(document.cookie);
+    for (i = 0; i < tabsNumber; i++) {
+        if (i == n) {
+            $("#tabPanel-"+i).show();
+            $("#tab_title").html(title_arr[i]);
+        } else {
+            $("#tabPanel-"+i).hide();
+        }
+    }
+}
+
+//自定义表单ajax提交，not_null_1_id,not_null_2_id,not_null_3_id为两个不为空的字段id
+function customAjaxSubmit(form_id,replace_id,not_null_1_id,not_null_2_id,not_null_3_id) {
+    if (not_null_1_id){
+        if ($("#"+not_null_1_id).val() == ""){
+            alert($("label[for="+not_null_1_id+"]").text()+"不能为空！")
+            return false
+        }
+    }
+    if (not_null_2_id){
+        if ($("#"+not_null_2_id).val() == ""){
+            alert($("label[for="+not_null_2_id+"]").text()+"不能为空！")
+            return false
+        }
+    }
+    if (not_null_3_id){
+        if ($("#"+not_null_3_id).val() == ""){
+            alert($("label[for="+not_null_3_id+"]").text()+"不能为空！")
+            return false
+        }
+    }
+
+
+    $("#"+form_id).ajaxSubmit(function(data){
+        if (data == "failed"){
+            alert("未保存成功，请注意必填字段不能为空！") ;
+        } else {
+            $("#"+replace_id).html(data);
+            alert("保存成功！")
+        }
+    })
+    return false
+}
+
+
+
+//操作cookie的方法
+// primary function to retrieve cookie by name
+function getCookie(name)
+{
+    var arg = name + "=";
+    var alen = arg.length;
+    var clen = document.cookie.length;
+    var i = 0;
+    while(i < clen)
+    {
+        var j = i + alen;
+        if (document.cookie.substring(i, j) == arg)
+        {
+            return getCookieVal(j);
+        }
+        i = document.cookie.indexOf(" ", i) + 1;
+        if(i == 0) break;
+    }
+    return;
+}
+
+// store cookie value with optional details as needed
+function setCookie(name, value, expires, path, domain, secure)
+{
+    deleteCookie(name);
+    document.cookie = name + "=" + escape(value) +
+        ((expires) ? "; expires=" + expires : "") +
+        ((path) ? "; path=" + path : "") +
+        ((domain) ? "; domain=" + domain : "") +
+        ((secure) ? "; secure" : "");
+}
+
+// remove the cookie by setting ancient expiration date
+function deleteCookie(name,path,domain)
+{
+    if(getCookie(name))
+    {
+        document.cookie = name + "=" +
+            ((path) ? "; path=" + path : "") +
+            ((domain) ? "; domain=" + domain : "") +
+            "; expires=Thu, 01-Jan-70 00:00:01 GMT";
+    }
+}
+
+// utility function to retrieve an expiration data in proper format;
+function getExpDate(days, hours, minutes)
+{
+    var expDate = new Date();
+    if(typeof(days) == "number" && typeof(hours) == "number" && typeof(hours) == "number")
+    {
+        expDate.setDate(expDate.getDate() + parseInt(days));
+        expDate.setHours(expDate.getHours() + parseInt(hours));
+        expDate.setMinutes(expDate.getMinutes() + parseInt(minutes));
+        return expDate.toGMTString();
+    }
+}
+
+//utility function called by getCookie()
+function getCookieVal(offset)
+{
+    var endstr = document.cookie.indexOf(";", offset);
+    if(endstr == -1)
+    {
+        endstr = document.cookie.length;
+    }
+    return unescape(document.cookie.substring(offset, endstr));
+}
+
+//点击对象的value为0是隐藏，为1时显示
+function display_items(obj,display1_id,display2_id){
+    if (obj.value == "0"){
+        $("#"+display1_id).hide();
+        if(display2_id){
+            $("#"+display2_id).show();
+        }
+    } else if(obj.value == "1"){
+        $("#"+display1_id).show();
+        if(display2_id){
+            $("#"+display2_id).hide();
+        }
+    }
+}
+
+
+//
+//function ajax_destroy_tr(confirm_text){
+//    var url = this.href;
+//    if(confirm_text){
+//        if(confirm(confirm_text)){
+//            $.post(url,{},function(data){
+//                $(this).parent().parent().remove();
+//                alert("删除成功！")  ;
+//                return false
+//            })
+//        }
+//    }
+//    return false
+//}
+
+
+function move_client(action,id,cate_id,text,td_id){
+    $.post('/clients/'+action,{"id":id,"cate_id":cate_id},function(data,success){
+        alert(text);
+        $("#"+td_id).hide();
+        return false
+    })
+    return false
+}
+
+function move_client_and_disabled(action,id,cate_id,text,td_id,confirm_text){
+    if(confirm_text){
+        if(confirm(confirm_text)){
+            $.post('/clients/'+action,{"id":id,"cate_id":cate_id},function(data,success){
+                alert(text);
+                $("#"+td_id).parent("tr").hide();
+                return false
+            })
+        }
+    } else {
+        $.post('/clients/'+action,{"id":id,"cate_id":cate_id},function(data,success){
+            alert(text);
+            $("#"+td_id).parent("tr").hide();
+            return false
+        })
+    }
+    return false
+}
+
+function hide_or_display(div_id,self_id){
+    $("#"+div_id).toggle();
+    if (self_id){
+        if($("#"+div_id).css("display") != "none"){
+            $("#"+self_id).html("<span style='color: red'>关闭</span>");
+//            return false
+        } else{
+            $("#"+self_id).html("<span>查看</span>");
+//            return false
+        }
+    }
+    return false
+}
+
+//表单ajax提交，有返回值
+function ajaxSubmitResult(action,div_id){
+    $.ajax('/clients/'+action,{},function(data,success){
+        $("#"+div_id).replaceWith(data);
+        alert("成功");
+        return false
+    })
+}
+
+function destroy_and_disabled(disable_id,confirm_text){
+    var url = this.href;
+    if(confirm(confirm_text)){
+        $.post(url,{},function(data){
+            if(data=="failed"){
+                alert("未成功！");
+            } else{
+                alert("成功！");
+                $("#"+disable_id).hide();
+            }
+            return false
+        })
+    }
+    return false
+}
+
+
+
+function changeAndReload(obj,replace_id,confirm_text,success_text){
+//    alert("-----------")
+    var url = obj.href;
+    alert(url);
+    if(confirm(confirm_text)){
+        alert("-----------");
+        $.post(url,{},function(data){
+            if(data=="failed"){
+                alert("未成功！");
+            } else{
+                alert(success_text);
+                $("#"+replace_id).html(data);
+            }
+            return false
+        })
+    }
+    return false
+}
+
+function move_and_disabled(obj,disable_id,confirm_text){
+    var url = obj.href;
+    if(confirm(confirm_text)){
+        $.post(url,{},function(data){
+            if(data=="failed"){
+                alert("未成功！请查看您可保护的客户数量！");
+            } else if(data=="success"){
+                alert("成功！");
+                $("#"+disable_id).hide();
+            }
+            return false
+        })
+    }
+    return false
+}

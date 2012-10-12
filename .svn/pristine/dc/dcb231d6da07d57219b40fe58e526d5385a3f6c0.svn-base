@@ -1,0 +1,37 @@
+class StatisticsController < ApplicationController
+
+  #before_filter :statistics_users
+
+
+  def serve
+    statistics_users(4)
+    @statistics = ServeStatistics.select_statistics(@users,params[:start_at],params[:end_at])
+    if request.xhr?
+      render :partial=>"/statistics/ajax_serve"
+    else
+      render :template => "/statistics/statistics"
+    end
+  end
+
+
+  def sell
+    statistics_users(2)
+    @statistics = SellStatistics.select_statistics(@users,params[:start_at],params[:end_at])
+    if request.xhr?
+      render :partial=>"/statistics/ajax_sell"
+    else
+      render :template => "/statistics/statistics"
+    end
+  end
+
+
+
+  private
+  def statistics_users(department_id)
+    @users = params[:user_id].present? ? User.where("id=?",params[:user_id]) : User.where("department_id = ?",department_id).subordinate_users(@current_user)
+  end
+
+  #def statistics_serves
+  #end
+
+end

@@ -1,0 +1,66 @@
+<% # encoding: utf-8 %>
+
+<%= form_for @order,:url=>{:controller=>"orders",:action=>"ajax_apply_update",:id=>@order},:html=>{:remote=>true} do |order_form| %>
+
+    <div>
+      <%= order_form.label "contact_person_id","订单联系人" %>
+      <%= order_form.select "contact_person_id",@contact_people.map{|c|[c.name,c.id]} %>
+    </div>
+
+    <table>
+      <tr>
+        <th width="85">选择产品</th>
+        <th width="80">总价</th>
+        <th width="85">已收款项</th>
+        <th width="85">服务开始时间</th>
+        <th width="85">服务结束时间</th>
+        <th width="85">续费标准</th>
+      </tr>
+    </table>
+    <%= order_form.fields_for :order_items do |order_item_fields| %>
+        <%# if order_item_fields.object.active? %>
+        <td><%= order_item_fields.select :product_id,@products.map{|p|[p.name,p.id]} %></td>
+        <td><%= order_item_fields.text_field :contract_amount,:class=>"liiii" %></td>
+        <td><%= order_item_fields.text_field "received_amount",:class=>"liiii" %></td>
+        <td><%= order_item_fields.text_field "serve_start_at",:class=>"time liiii" %></td>
+        <td><%= order_item_fields.text_field "serve_end_at",:class=>"time liiii" %></td>
+        <td><%= order_item_fields.text_field "fee_standard",:class=>"liiii" %></td>
+        <%# end %>
+    <% end %>
+
+    <div>
+      <%= order_form.label "description","订单备注" %>
+      <%= order_form.text_area "description",:rows=>4,:cols=>40 %>
+    </div>
+
+    <div>
+      <%= order_form.submit "提交" %>
+    </div>
+<% end %>
+
+<%#= form_for(@order,:url=>{:controller=>"orders",:action=>"ajax_apply_update",:id=>@order},:remote=>true) do |f| %>
+
+<%#= f.error_messages %>
+<%#= render :partial => "form",:locals=>{:f=>f} %>
+<%#= f.submit "提交" %>
+<%# end %>
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        // 输入框日期弹出框
+        $(".time").calendar();
+
+        var order_id = '<%= @order.id %>'
+        var client_id = '<%= @mini_client.id %>'
+        $('#edit_order_'+order_id)
+                .bind("ajax:beforeSend",function(evt,xhr,settings){
+                    $("#order_show_pop"+client_id).hide();
+                    createPrintDIV();
+                })
+                .bind("ajax:success", function(evt, data, status, xhr){
+                    alert("修改已经完成，等待审核！");
+                    $("#"+'<%= "show-tab-4"%>'+client_id).html(data);
+                    $("#sk").remove();
+                })
+
+    })
+</script>

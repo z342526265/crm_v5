@@ -1,0 +1,16 @@
+require 'rubygems'
+require 'rufus/scheduler'
+
+scheduler = Rufus::Scheduler.start_new
+
+#定义每10分钟
+scheduler.every("30m") do
+
+  #自动调入公海
+	MiniClient.where("due_time < ? and due_time > ?",Time.now,Time.now - 1.hour).update_all(:status_num => 0)
+
+  #自动删除名称为空的客户
+  Client.where("name is null").delete_all
+
+
+end

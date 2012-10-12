@@ -1,0 +1,62 @@
+<p><h2>低值易耗品库存列表</h2></p>
+<div>
+  <%= link_to_custom "新增办公用品",{:controller=>"assets",:action=>"create",:cate=>1} %>
+  <%= link_to_custom "办公用品入库",{:controller=>"stocks",:action=>"create"} %>
+</div>
+<div>
+  <%= form_for @search, :url => {:controller=>"stocks",:action=>"index"},:html => {:method => :get} do |f| %>
+      <%= f.label :asset_id_eq,'物品' %>
+      <%= f.select :asset_id_eq,Asset.find_all_by_cate(1).map{|u|[u.name,u.id]},{:include_blank=>true},{:class=>"user_select"} %>&nbsp;&nbsp;&nbsp;
+      <%= f.label :purchase_user_id_eq,'采购人' %>
+      <%= f.select :purchase_user_id_eq,User.all.map{|u|[u.name,u.id]},{:include_blank=>true},{:class=>"user_select"} %>&nbsp;&nbsp;&nbsp;
+      <%= f.submit "提交" %>
+  <% end %>
+</div>
+<table>
+
+  <tr>
+    <td>物品名称</td>
+    <td>采购日期</td>
+    <td>采购人</td>
+    <td>采购方式</td>
+    <td>采购价格</td>
+    <td>采购数量</td>
+    <td>库存数量</td>
+    <td>已分配数量</td>
+    <td>备注</td>
+    <td colspan="2">操作</td>
+  </tr>
+  <% @stocks.each do |stock| %>
+      <tr>
+        <td><%= stock.asset_name %></td>
+        <td><%= stock.purchase_date %></td>
+        <td><%= stock.purchase_user_name %></td>
+        <td><%= stock.purchase_way_name %></td>
+        <td><%= stock.purchase_price %></td>
+        <td><%= stock.purchase_count %></td>
+        <td id="remained_count_<%= stock.id %>"><%= stock.remained_count %></td>
+        <td id="used_count_<%= stock.id %>"><%= stock.used_count %></td>
+        <td><%= stock.description %></td>
+        <td>
+          <%= link_to_custom "修改",{:controller=>"stocks",:action=>"update",:id=>stock} %>
+          <%= link_to_custom "删除",{:controller=>"stocks",:action=>"destroy",:id=>stock},:method=>:delete,:confirm=>"确认删除？" %>
+          <%= link_to_custom "领用",{:controller=>"stocks",:action=>"use",:id=>stock},:remote=>true,:class=>"use_stock" %>
+        </td>
+      </tr>
+  <% end %>
+</table>
+
+<div id="custom_popup"></div>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".use_stock")
+                .bind("ajax:beforeSend", function(evt, xhr, settings){
+                    createPopup();
+                })
+                .bind("ajax:success",function(evt,data){
+                   $("#popup_content").html(data);
+                })
+    })
+
+</script>

@@ -1,0 +1,48 @@
+<p><h2>领用列表</h2></p>
+<div>
+  <%= form_for @search, :url => {:controller=>"stocks",:action=>"index"},:html => {:method => :get} do |f| %>
+      <%= hidden_field_tag "cate","use" %>
+      <%= f.label :asset_id_eq,'物品' %>
+      <%= f.select :asset_id_eq,Asset.find_all_by_cate(1).map{|u|[u.name,u.id]},{:include_blank=>true},{:class=>"user_select"} %>&nbsp;&nbsp;&nbsp;
+      <%= f.label :user_id_eq,'使用人' %>
+      <%= f.select :user_id_eq,User.all.map{|u|[u.name,u.id]},{:include_blank=>true},{:class=>"user_select"} %>&nbsp;&nbsp;&nbsp;
+      <script language="javascript" type="text/javascript" src="/My97DatePicker/WdatePicker.js"></script>
+      <%= f.label "used_date_eq","领用日期" %>
+      <%= f.text_field "used_date_eq",:onClick=>"WdatePicker()",:class=>"_60px" %>
+      <%= f.submit "提交" %>
+  <% end %>
+</div>
+<table>
+
+  <tr>
+    <td>物品名称</td>
+    <td>领用人</td>
+    <td>领用日期</td>
+    <td>领用数量</td>
+    <td>备注</td>
+  </tr>
+  <% @stocks.each do |stock| %>
+      <tr>
+        <td><%= stock.asset_name %></td>
+        <td><%= stock.user_name %></td>
+        <td><%= stock.used_date %></td>
+        <td><%= stock.used_count %></td>
+        <td><%= stock.description %></td>
+      </tr>
+  <% end %>
+</table>
+
+<div id="custom_popup"></div>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".use_stock")
+                .bind("ajax:beforeSend", function(evt, xhr, settings){
+                    createPopup();
+                })
+                .bind("ajax:success",function(evt,data){
+                   $("#popup_content").html(data);
+                })
+    })
+
+</script>

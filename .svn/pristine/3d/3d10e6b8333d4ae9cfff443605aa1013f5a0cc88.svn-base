@@ -1,0 +1,45 @@
+<% mini_client_id = @mini_client ? @mini_client.id : ""  %>
+<tr id='<%= "order_index" + order.id.to_s %>' bgcolor="#e4ffca">
+  <td><%= link_to_custom order.number,{:controller=>"orders",:action=>"ajax_show",:id=>order},:remote=>true,:class=>"order_show_class"+mini_client_id.to_s %></td>
+  <td class='check_status_text'></td>
+  <td><%=truncate(order.description,:length=>25) %></td>
+  <td>服务状态：<%= order.serve_status_text %></td>
+  <td><%= order.contract_amount %></td>
+  <td><%= order.received_amount %></td>
+  <td style="<%= "color: red" if order.owe_amount > 0 %>"><%= order.owe_amount %></td>
+  <td colspan="2">
+    当前订单审核状态：<%= order.check_status_text %>
+    <%#= link_to_custom '修改',{:controller=>"orders",:action=>"ajax_apply_update",:id=>order},:remote=>true,:class=>"ajax_apply_update" %>
+    <%#= link_to_custom '申请删除',{:controller=>"orders",:action=>"ajax_apply_destroy",:id=>order},:remote=>true,:class=>"ajax_apply_destroy" %>
+  </td>
+  <td></td>
+</tr>
+<% items.each do |item| %>
+    <tr id='<%= "order_index" + order.id.to_s+item.id.to_s %>'>
+      <td><%= link_to_custom order.number,{:controller=>"orders",:action=>"ajax_show",:id=>order},:remote=>true,:class=>"order_show_class"+mini_client_id.to_s %></td>
+      <td class='check_status_text'><%= item.product_name %></td>
+      <td>服务到期时间：<%= item.serve_end_at %></td>
+      <td>服务状态：<%= item.serve_status_text %></td>
+      <td><%= item.contract_amount %></td>
+      <td><%= item.received_amount %></td>
+      <td style="<%= "color: red" if item.owe_amount > 0 %>"><%= item.owe_amount %></td>
+      <% if order.check_status ==0 %>
+          <td colspan="2">
+            <% if @current_user.had_permission?(35) && item.owe_amount > 0 && @mini_client %>
+                <%= form_tag "/orders/add_paid_item?id=#{item.id}",:remote=>true,:class=>"add_paid_item_form" do %>
+                    请输入收到的款项金额<%= text_field_tag "paid_item[received_amount]" %>
+                    <%= submit_tag "提交" %>
+                <% end %>
+            <% end %>
+            <%#= link_to_custom '申请删除',{:controller=>"orders",:action=>"ajax_apply_destroy",:id=>order},:remote=>true,:class=>"ajax_apply_destroy" %>
+          </td>
+          <td>
+            <%= link_to_custom "修改",{:controller=>"orders",:action=>"ajax_update_order_item",:order_item_id=>item,:mini_client_id=>@mini_client},:remote=>true,:class=>"ajax_update_order_item"+mini_client_id.to_s %>
+          </td>
+      <% else %>
+          <td colspan="3">
+            <%= item.check_status_text %>
+          </td>
+      <% end %>
+    </tr>
+<% end %>

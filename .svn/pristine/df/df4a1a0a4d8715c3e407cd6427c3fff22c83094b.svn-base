@@ -1,0 +1,23 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>产品名称:</b>
+  <%= @product.name %>
+</p>
+
+<p>
+  <b>产品编号:</b>
+  <%= @product.number %>
+</p>
+
+<p>
+  <b>产品类别:</b>
+  <%= @product.category_id %>
+</p>
+
+<p>
+  <b>产品描述:</b>
+  <%= @product.description %>
+</p>
+
+<%= link_to_custom '返回', :controller=>"products",:action=>"index" %>

@@ -1,0 +1,140 @@
+<table width="100%" align="left" class="kkhhjbx" >
+  <tr bgcolor="#CCFF66">
+    <td colspan="3" align="left" style="font-weight: bold; font-size: 14px;">
+      &nbsp;&nbsp;基本信息
+    </td>
+    <td>
+      <%= link_to_custom "编辑",{:action=>"ajax_update_client",:controller=>"mini_clients",:id=>client},:remote=>true,:id=>"update_client"+client.id.to_s %>
+      <%= link_to_custom "历史编辑记录",{:action=>"ajax_client_update_log",:controller=>"mini_clients",:id=>client},:remote=>true,:id=>"update_log"+client.id.to_s %>
+    </td>
+  </tr>
+  <tr align="left">
+    <td width="25%">
+      <strong>客户名称:</strong>
+      <%= client.name %>
+    </td>
+    <td width="25%">
+      <strong> 公司网站:</strong>
+      <%=auto_link client.web_url,:html=>{:target=>"_blank"} %>
+    </td>
+    <td width="25%">
+      <strong>  地址: </strong>
+      <%= client.address %>
+    </td>
+    <td width="25%">
+      <strong> 行业: </strong>
+      <%= client.trade %>
+    </td>
+  </tr>
+  <tr align="left">
+    <td width="25%">
+      <strong>企业法人:  </strong>
+      <%= client.legal_person %>
+    </td>
+    <td width="25%">
+      <strong> 注册资金:  </strong>
+      <%= client.fund %>
+    </td>
+    <td width="50%" colspan="2">
+      <strong> 成立日期: </strong>
+      <%= client.found_date %>
+    </td>
+  </tr>
+  <tr align="left">
+    <td colspan="2" width="50%">
+      <strong> 主要业务范围:   </strong>
+      <%= client.main_business %>
+    </td>
+    <td colspan="2" width="50%">
+      <strong> 主要客户群: </strong>
+      <%= client.main_client_base %>
+    </td>
+  </tr>
+  <tr align="left">
+    <td colspan="2" width="50%">
+      <strong> 市场范围:   </strong>
+      <%= client.business_rang %>
+    </td>
+    <td colspan="2" width="50%">
+      <strong> 市场区域:    </strong>
+      <%= client.business_area %>
+    </td>
+  </tr>
+  <tr align="left">
+    <td colspan="4" width="100%">
+      <strong> 其他: </strong>
+      <%= client.description %>
+    </td>
+  </tr>
+  <tr align="left">
+    <td colspan="4" width="100%">
+      <strong> 当前客户类别: </strong>
+      <%= client.client.grade_name %>
+      <% if @current_user.had_permission?(19)  %>
+          <%= form_tag "/mini_clients/update_grade?id=#{client.id}" do %>
+              改变客户类别为<%= select_tag "client[grade_id]",options_from_collection_for_select(Category.find_all_by_cate('client_grade'), "id", "name") %>
+              <%= submit_tag "提交" %>
+          <% end %>
+      <% end %>
+    </td>
+  </tr>
+</table>
+
+<!-- 弹出层 -->
+<div id='<%= "update_client_divPop"+client.id.to_s %>' style="background-color:#CCFF88; border: solid 1px #666666; position: absolute; display:none;
+        width:600px; height:auto; left: 30%;top:25%;">
+  <table width="100%">
+    <tr>
+      <td align="center" style="font-size: 16px; line-height: 26px;">
+        <strong>基本信息</strong>
+      </td>
+      <td align="right"><a id='<%= "update_client_close"+client.id.to_s %>'><img src=<%= asset_path('new_css_v1/3-3main.gif') %> /></a></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <div id='<%= "update_client_callback"+client.id.to_s %>' style="text-align: center; background: #a6ff76" >
+          <p>正在加载...</p>
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        var speed = 500;
+        var client_id = <%= client.id %>
+            //编辑弹出框
+                $("#update_client"+client_id).click(function(event)
+                {
+                    var url = this.href
+                    $.get(url, {},function (data, success) {
+                        jQuery("#update_client_callback"+client_id).html(data);
+                    });
+                    //取消事件冒泡
+                    event.stopPropagation();
+                    //动画显示
+                    $("#update_client_divPop"+client_id).toggle(speed);
+                    event.preventDefault();
+                });
+
+
+        //编辑日志弹出框
+        $("#update_log"+client_id).click(function(event)
+        {
+            var url = this.href
+            $.get(url, {},function (data, success) {
+                jQuery("#update_client_callback"+client_id).html(data);
+            });
+            //取消事件冒泡
+            event.stopPropagation();
+            //动画显示
+            $("#update_client_divPop"+client_id).toggle(speed);
+            event.preventDefault();
+        });
+        //单击空白区域隐藏弹出层
+        $("#update_client_close"+client_id).click(function(event) { $("#update_client_divPop"+client_id).hide(speed) });
+    })
+
+
+</script>

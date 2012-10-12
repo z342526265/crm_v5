@@ -1,0 +1,180 @@
+# encoding: utf-8
+class OrderDevelopStepsController < ApplicationController
+
+  #允许现场编辑的字段
+  #in_place_edit_for :develop_step, :request_date
+
+  def index
+    @search  = Order.search(params[:search])
+    txt = "process_flow = 0"
+    case params[:cate]
+      when "0"
+        txt = txt + " and develop_status = 0"
+      when "1"
+        txt = txt + " and develop_status in (1,2,3)"
+      when "2"
+        txt = txt + " and develop_status = 4"
+    end
+    @orders = @search.includes(:order_item).where(txt).page(params[:page]).per(@every_page_count)
+  end
+
+  #弹出订单分配页面
+  def distribute
+    @order = Order.find(params[:order_id])
+    @develop_steps = @order.develop_steps.order(:ordinal_number)
+    @develop_steps = @order.create_develop_steps if @develop_steps.blank?
+    render :partial=>"order_develop_steps_form"
+  end
+
+  # 分配、修改每个步骤
+  def update
+    @order = Order.find(params[:order_id])
+    @develop_step = @order.develop_steps.find(params[:develop_step_id])
+    if request.get?
+      @users = User.subordinate_users(@current_user)
+      render :partial=>"develop_step_form_tds",:locals => {:order=>@order,:step=>@develop_step,:users=>@users}
+    else
+      @develop_step.update_attributes(params[:develop_step])
+      @develop_steps = @order.develop_steps.order(:ordinal_number)
+      render :partial=>"order_develop_steps_form"
+    end
+  end
+
+  #完成任务分配
+  def complete_distribute
+    @order = Order.find(params[:order_id])
+    @order.update_attribute(:develop_status,1)  #状态更改为已分配
+    render :js=>"jQuery('#order_#{@order.id}').children().eq(4).text('已分配');jQuery('.update').hide();alert('分配成功!');"
+  end
+
+  #我的任务
+  def my_develop_steps
+    @users = User.subordinate_users(@current_user)
+    @search  = DevelopStep.search(params[:search])
+    @develop_steps = @search.joins("INNER JOIN orders ON orders.id = develop_steps.develop_step_resource_id").where("orders.develop_status != ? and user_id in (?)",0,@users.map{|u|u.id})
+    cate = [0,3,4]
+    case params[:cate]
+      when "1"
+        cate = [1]
+      when "2"
+        cate = [2]
+    end
+    @develop_steps = @develop_steps.where("develop_steps.develop_status in (?)",cate).order(:develop_step_resource_id).page(params[:page]).per(@every_page_count)
+  end
+
+
+  #完成我的任务,提交审核
+  def complete
+    find_order_and_develop_step
+    ActiveRecord::Base.transaction do
+      @develop_step.update_attributes(:develop_status=>1,:submit_checking_date=>Date.today)
+      @check_item = @develop_step.check_items.build(
+          :cate=>0,
+          :attrs=>{:develop_status=>2},  #审核通过后任务状态变为已通过
+          :name=>"【#{@current_user.name}】提交任务【#{@develop_step.name}】",
+          :description=>"客户【#{@order.mini_client.name}】的订单【#{@order.number}】，已完成#{@develop_step.name}！"
+      )
+    end
+    render :partial => "my_develop_step_tds",:locals => {:order=>@order,:step=>@develop_step}
+  end
+
+
+  def check
+    find_order_and_develop_step
+    @check_item = @develop_step.check_item
+    if params[:result] == "true"
+      ActiveRecord::Base.transaction do
+        @develop_step.update_attributes(:develop_status=>2,:complete_date=>Date.today,:checking_date=>Date.today)
+        @check_item.update_attributes(:checked_user_id=>@current_user.id,:is_checked=>true,:is_approval=>true) if @check_item
+      end
+    elsif params[:result] == "false"
+      ActiveRecord::Base.transaction do
+        @develop_step.update_attributes(:develop_status=>0,:checking_date=>Date.today)
+        @check_item.update_attributes(:checked_user_id=>@current_user.id,:is_checked=>true,:is_approval=>false) if @check_item
+      end
+    end
+    redirect_to :back
+    flash[:notice] = "审核完成"
+  end
+
+
+  #延期申请 ,申请延期完成
+  def apply_delay_complete
+    find_order_and_develop_step
+    @apply_delay_complete = @develop_step.apply_delay_completes.build(params[:apply_delay_complete])
+    if request.get?
+      render :partial=>"apply_delay_complete_form"
+    else
+      ActiveRecord::Base.transaction do
+        @apply_delay_complete.save
+        @order.update_attribute(:develop_status,2)
+        @develop_step.update_attributes(:develop_status=>3,:submit_checking_date=>Date.today)
+      end
+      render :partial => "my_develop_step_tds",:locals => {:order=>@order,:step=>@develop_step}
+    end
+  end
+
+  #延期申请审核
+  def delay_check
+    find_order_and_develop_step
+    find_apply_delay_complete
+    render :partial=>"delay_check"
+  end
+
+
+  def agree_delay
+    find_order_and_develop_step
+    find_apply_delay_complete
+    @develop_steps = @order.develop_steps.order(:ordinal_number)
+    @can_edit_develop_steps = @develop_steps.where("develop_status in (?)",[0,3])
+    @cannot_edit_develop_steps = @develop_steps.where("develop_status in (?)",[1,2])
+    @users = User.subordinate_users(@current_user)
+    if request.get?
+      render :partial=>"agree_delay"
+    else
+      result = DevelopStep.transaction do
+        params[:order][:develop_step].each do |key,val|
+          develop_step = DevelopStep.find(key)
+          if key.to_s == @develop_step.id.to_s
+            val = val.merge(:develop_status=>4,:delay_count=>develop_step.delay_count + 1)
+            develop_step.apply_delay_complete.update_attributes(:check_status=>1)
+          end
+          develop_step.update_attributes(val)
+        end
+        @order.update_attributes(:delay_count=>@order.delay_count+1,:develop_status=>3)
+      end
+      if result.present?
+        flash[:notice] = "延期申请已通过，开发步骤重新分配成功!"
+      else
+        flash[:alert] = "更新未成功，请重新操作，或与系统管理员联系!"
+      end
+      redirect_to :action=>"my_develop_steps"
+    end
+
+
+  end
+
+
+  def disagree_delay
+    find_order_and_develop_step
+    find_apply_delay_complete
+    ActiveRecord::Base.transaction do
+      @apply_delay_complete.update_attributes(:check_status=>2) #审核状态更改为已驳回
+      @develop_step.update_attributes(:develop_status=>0)
+      @develop_step.apply_delay_complete.update_attributes(:check_status=>2)
+    end
+    render :partial => "my_develop_step_tds",:locals => {:order=>@order,:step=>@develop_step}
+  end
+
+
+
+  private
+  def find_order_and_develop_step
+    @order = Order.find(params[:order_id])
+    @develop_step = @order.develop_steps.find(params[:develop_step_id])
+  end
+
+  def find_apply_delay_complete
+    @apply_delay_complete = @develop_step.apply_delay_complete
+  end
+end

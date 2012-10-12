@@ -1,0 +1,32 @@
+# encoding: utf-8
+class Asset < ActiveRecord::Base
+
+  include SetCreatedUser
+  include CustomAssociationMethod
+
+  belongs_to :user
+  belongs_to :supplier
+  belongs_to :purchase_user,:foreign_key => "purchase_user_id",:class_name => "User"
+  belongs_to :asset_cate,:foreign_key => "asset_cate_id",:class_name => "Category"
+  belongs_to :purchase_way,:foreign_key => "purchase_way_id",:class_name => "Category"
+
+
+  before_save :set_number
+
+
+  PURCHASE_WAY = [["网上购物",0],["亲自采购",1]]
+  CATE = [["电话",0],["电脑",1]]
+
+  #def purchase_way_name
+  #  PURCHASE_WAY[self.purchase_way_id].first
+  #end
+
+
+  private
+  def set_number
+    count_num = Asset.find_all_by_asset_cate_id(self.asset_cate_id).count + 1
+    num = 4-count_num.to_s.length
+    self.number = self.asset_cate.description + "0"*num + count_num.to_s
+  end
+
+end

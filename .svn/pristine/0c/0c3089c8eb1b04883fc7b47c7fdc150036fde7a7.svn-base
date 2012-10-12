@@ -1,0 +1,31 @@
+<% # encoding: utf-8 %>
+<h1>客户列表</h1>
+
+<% if @clients.blank? %>
+    <p>没有搜索到重名的客户</p>
+<% else %>
+    <table width="100%" class="khsstanchu" bgcolor="#E1FFB9">
+      <tr>
+        <th>客户名称</th>
+        <th>公司网址</th>
+        <th>公海</th>
+        <th></th>
+        <th></th>
+      </tr>
+        <% @clients.each_with_index do |client,num| %>
+          <tr>
+            <td><%= client.name %></td>
+            <td><%= client.web_url %></td>
+            <td><%= client.public_stores_names %></td>
+            <td><%= link_to_custom '查看',"", :onclick=>"hide_or_display(#{(num+1).to_s+'11'},#{(num+1).to_s+'31415926'});return false;",:remote=>true,:id=>(num+1).to_s+'31415926' %></td>
+            <!--<%# if @current_category.level == 0 && client.status_num == 0 %>-->
+                <!--<td id=<%#= client.id.to_s+"1" %>><%#= link_to_custom "加入电话库","",:onclick=>"move_client('add_to_general_personal_store',#{client.id},#{@current_category.id},'成功加入电话库',#{client.id.to_s+'1'})",:remote=>true %></td>-->
+            <!--<%# end %>-->
+          <tr>
+            <td colspan="5"><%= render :partial => "/shared/mini_clients/search_part1",:locals => {:client => client,:num=>num} %></td>
+          </tr>
+
+        <% end %>
+    </table>
+    <%#= paginate @clients if @clients.present? %>
+<% end %>

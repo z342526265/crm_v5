@@ -1,0 +1,43 @@
+.xzm{font-size: 14px; margin-top: 10px; font-weight: bold; width: 800px; text-align: center; line-height: 30px;}
+.xzm a{ color: #ff0000;}
+#wenzims{ float: left; line-height: 30px; width:200px;margin-left: 180px; font-size: 14px;}
+#wbxk{float:left; line-height: 30px;width: 200px;}
+#wbxk select{ width: 200px;}
+#anniuys{ clear: both; width: 700px; text-align: center; margin-top: 10px;height: 60px;}
+
+
+#juesem{ width: 280px; margin-top: 10px;}
+#juesem .jusewenben,#jueselx select{width: 200px;}
+#jueselx{ width: 280px;}
+.bzsm{ clear: both; height: 60px; line-height: 60px; text-align: center;margin-top: 10px;}
+.bzsm1{margin-top: 10px;}
+.bzsm .kk{width:200px; height: 60px;}
+#bzsm span{ height: 60px; line-height: 60px; color: #ff0000;text-align: center;}
+#juesexx{clear:both; width: 335px;font-weight: bold; }
+#xuanxlb{clear: both; width: 800px;}
+#xuanxlb .jslb{ float: left; width: 300px; line-height: 20px; margin-left: 100px;font-weight: bold;}
+#xuanxlb .qxxx{ float: left;width:400px; text-align: center;line-height: 20px; text-align: left;}
+.alert{color:#ff0000;}
+.notice{color:#3300ff;}
+#qimsm1{width:200px;float: left; line-height: 27px;}
+#wenbenys1{width: 200px;float: left; line-height: 25px;}
+.ka1{height: 33px; width: 180px;}
+table.xlkhhs{width: 600px;  text-align: right;}
+table.xlkhhs td{width: 280px; line-height: 30px; padding-right: 20px;}
+table.xlkhhs td input,table.xlkhhs td select{width: 180px; height: 22px;}
+table.xlkhhs td textarea{width:180px;height:60px; }
+
+
+#tab{ list-style: none; width: 100%; clear: both;}
+.cli{float: left; width:100px; display: inline;margin-left: 10px; line-height: 26px; }
+td.kkookk select{width: 100px;}
+.ggllshezhi,.ggllshezhi tr,.ggllshezhi td,.ggllshezhi th,.gonghaitableys,.gonghaitableys tr,.gonghaitableys th,.gonghaitableys td
+ ,.kehuliebiaoys tr,.kehuliebiaoys td,.kehuliebiaoys th,.jueseyslib tr,.jueseyslib th,.jueseyslib td,.bmliebiao tr,.bmliebiao th,.bmliebiao td
+,.khsstanchu tr,.khsstanchu td,.khsstanchu th,.kkhhjbx tr,.kkhhjbx td,.kkhhjbx th ,.lxrxxnyy tr,.lxrxxnyy th,.lxrxxnyy td,.lxrjlysbju tr,.lxrjlysbju th,.lxrjlysbju td
+,.ygxinxilb2 tr,.ygxinxilb2 td,.ygxinxilb2 th
+{ border: 1px solid #cccccc;}
+ .login_input1 {border: 1px solid #666666; width: 120px; height: 20px;}
+.login_input2 {border: 1px solid #666666; width: 120px; height:20px;margin-top:12px;}
+.login_input3 {border: 1px solid #666666; width: 30px;margin-top:10px;}
+.yiskask select{border: 1px solid #cccccc; width: 200px; height: 22px; line-height: 30px;}
+.shezhibjlb{font-weight: bold; float: left;}

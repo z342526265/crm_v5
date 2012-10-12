@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CrmV5</title>
+  <%= stylesheet_link_tag    "application", :media => "all" %>
+  <%= javascript_include_tag "application" %>
+  <%= csrf_meta_tags %>
+
+  <script type="text/javascript">
+      $(document).ready(function(){
+
+          //flash提示信息高亮渐变
+          setTimeout("document.getElementById('flash_notice').style.display='none'", 5000);
+          setTimeout("document.getElementById('flash_alert').style.display='none'", 5000);
+
+          //找出主菜单的tabNum值
+          var tabNum = $.cookie("tabNum") ? $.cookie("tabNum") : "0" ;
+
+          //显示对应的二级菜单，并把主菜单用深色标出
+          processMainMenu(tabNum);
+
+          //获取点击的二级菜单的num值
+          var menu_num = $.cookie("menu_num") ? $.cookie("menu_num") : "0" ;
+
+          //找到cookie中指定的元素，然后把该元素的颜色改变
+          $("div#tabPanel-"+tabNum+" [menu_num="+menu_num+"]").css({"background":"#008800","color":"#fff","font-style":"italic"});
+//          $("div#tabPanel-"+tabNum+" [menu_num="+menu_num+"]").css({"font-weight":"bold","color":"#000000"});
+
+      })
+
+  </script>
+
+</head>
+<body>
+
+<div id="pr"></div>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" style="table-layout:fixed;">
+  <tr>
+    <td height="9" style="line-height:9px; background-image:url(<%= asset_path("new_css_v1/main_04.gif") %>) ">
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td width="97" height="9" background="<%= asset_path("new_css_v1/main_01.gif") %>">&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+      </table></td>
+  </tr>
+  <tr>
+    <td height="47" background="<%= asset_path("new_css_v1/main_09.gif") %>"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="97" height="47" background="<%= asset_path("new_css_v1/main_06.gif") %>">&nbsp;</td>
+
+        <td width="155" background="<%= asset_path("new_css_v1/main_08.gif") %>">&nbsp;</td>
+        <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td height="23" valign="bottom" ><img src="<%= asset_path("new_css_v1/main_12.gif") %>" width="367" height="23" border="0" usemap="#Map1" />&nbsp;&nbsp;&nbsp;&nbsp;
+              <span class="STYLE1"  style="display:inline;">
+                 姓名：<%= @current_user.name %>  &nbsp;&nbsp;
+                职位：<%= @current_user.position_name %> &nbsp;&nbsp;
+                部门：<%= @current_user.department_name %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                 您有&nbsp;<%= @reminding_count || 0 %>&nbsp;个提醒！</span></td>
+          </tr>
+        </table></td>
+        <td width="200" background="<%= asset_path("new_css_v1/main_11.gif") %>">
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td width="11%" height="23">&nbsp;</td>
+              <td width="89%" valign="bottom"><span class="STYLE1">日期：<%= Date.today %></span></td>
+            </tr>
+          </table></td>
+      </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td height="5" style="line-height:5px; background-image:url(<%= asset_path("new_css_v1/main_18.gif") %>)">
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td width="180" background="<%= asset_path("new_css_v1/main_16.gif") %>"  style="line-height:5px;">&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+      </table></td>
+  </tr>
+</table>
+
+<map name="Map" id="Map1"><area shape="rect" coords="3,1,49,22" href="/home/index" />
+  <area shape="rect" coords="52,2,95,21" href="" onclick="history.go(-1)" />
+  <area shape="rect" coords="102,2,144,21" href="" onclick="history.go(+1)" />
+  <area shape="rect" coords="150,1,197,22" href="" onclick="history.go(0)" />
+  <area shape="rect" coords="210,2,304,20" href="/admin/edit_password" />
+  <area shape="rect" coords="314,1,361,23" href="/admin/logout" />
+</map>
+
+
+
+<table width="100%" height="480" border="0" cellpadding="0" cellspacing="0" style="table-layout:fixed; padding:0px; margin:0 auto;" >
+<tr>
+<td background="<%= asset_path("new_css_v1/main_40.gif") %>" style="width:3px;">&nbsp;</td>
+<td width="177"  style="border-right:solid 1px #9ad452;">
+<!--中间左边-->
+<table width="175" height="480" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td valign="top">
+<table width="100%" height="480" border="0" cellspacing="0" cellpadding="0" style="table-layout:fixed">
+<tr>
+  <td id="tab_title" height="26" background="<%= asset_path("new_css_v1/main_21.gif") %>" class="STYLE1" align="center">我的工作台</td>
+</tr>
+<tr>
+  <td style="background-image:url(<%= asset_path("new_css_v1/main_23.gif") %>); background-repeat:repeat-x;">
+    <table width="98%" border="0" align="center" cellpadding="0" cellspacing="0">
+      <tr>
+        <td height="30">
+          <div align="center" style="width:170px; height:260px; overflow-y:auto; overflow-x:hidden;">
+
+            <div id="tabPanel-0" style="display: none; height:240px;" class="secondary_menu">
+              <!--<div id="tabChild-0">我的工作台</div>-->
+              <ul class="lefter_kh_ul">
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "我的信息", {:controller=>"users",:action=>"show",:id=>@current_user},:menu_num=>0 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "代办事项",{:controller=>"home",:action=>"index"},:menu_num=>1 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '待分配订单', {:controller=>"order_develop_steps",:action=>"index",:cate=>0},:menu_num=>2 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '我的任务', {:controller=>"order_develop_steps",:action=>"my_develop_steps"},:menu_num=>4 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '审核中的任务', {:controller=>"order_develop_steps",:action=>"my_develop_steps",:cate=>1},:menu_num=>5 %>
+                </li>
+              </ul>
+            </div>
+            <div id="tabPanel-1" style="display: none;height:240px;" class="secondary_menu">
+
+              <!--<div id="tabChild-1">员工</div>-->
+              <ul class="lefter_kh_ul">
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "我的信息", {:controller=>"users",:action=>"show",:id=>@current_user},:menu_num=>0 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "我的基本信息", {:controller=>"users",:action=>"basic_information",:id=>@current_user},:menu_num=>1 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "我的家庭信息", {:controller=>"users",:action=>"family_information",:id=>@current_user},:menu_num=>3 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "我的岗位信息", {:controller=>"users",:action=>"position_information",:id=>@current_user},:menu_num=>4 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "新增员工",{:controller=>"users",:action=>"new"},:menu_num=>5 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "所有员工",{:controller=>"users",:action=>"index"},:menu_num=>6 %>
+                </li>
+              </ul>
+            </div>
+
+            <div id="tabPanel-2" style="display: none;height:240px;" class="secondary_menu">
+
+              <!--<div id="tabChild-2">部门岗位</div>-->
+              <ul class="lefter_kh_ul">
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "新增部门", {:controller=>"departments",:action=>"new"},:menu_num=>0%>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "部门一览", {:controller=>"departments",:action=>"index"},:menu_num=>1 %>
+                </li>
+                <!--<li class="lefter_kh_li"><img src="<%#= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;-->
+                <!--<%#= link_to_menu_custom "岗位一览",{:controller=>"positions",:action=>"index"},:menu_num=>0 %>-->
+                <!--</li>-->
+              </ul>
+            </div>
+
+            <div id="tabPanel-3" style="display: none;height:240px;" class="secondary_menu">
+              <!--<div id="tabChild-3">角色权限</div>-->
+              <ul class="lefter_kh_ul">
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "新建角色", {:controller=>"roles",:action=>"new"},:menu_num=>0 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "角色一览", {:controller=>"roles",:action=>"index"},:menu_num=>1 %>
+                </li>
+              </ul>
+            </div>
+
+            <div id="tabPanel-4" style="display: none;height:240px;" class="secondary_menu">
+
+              <!--<div id="tabChild-4">客户管理</div>-->
+              <ul class="lefter_kh_ul">
+
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "基础客户信息", {:controller=>"clients",:action=>"index"},:menu_num=>0 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "新建客户", {:controller=>"mini_clients",:action=>"new"},:menu_num=>1 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "批量导入", {:controller=>"mini_clients",:action=>"client_import"},:menu_num=>2 %>
+                </li>
+
+                <% @current_public_stores.each_with_index do |p,i| %>
+                    <li class="lefter_kh_li">
+                      <img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                      <%= link_to_menu_custom p.name, {:controller=>"mini_clients",:action=>"index",:public_store_id=>p},:menu_num=>3+i %>
+                    </li>
+                <% end %>
+                <% l = @current_public_stores.length %>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "我的客户库", {:controller=>"mini_clients",:action=>"my_follow_clients"},:menu_num=>2+l+1 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "我的成单客户", {:controller=>"mini_clients",:action=>"my_clients_of_had_orders"},:menu_num=>2+l+2 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "我维护的客户", {:controller=>"mini_clients",:action=>"my_serve_clients"},:menu_num=>2+l+3 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "已失效的客户", {:controller=>"mini_clients",:action=>"my_serve_clients",:cate=>1},:menu_num=>2+l+4 %>
+                </li>
+
+              </ul>
+            </div>
+
+
+            <div id="tabPanel-5" style="display: none;height:300px;" class="secondary_menu">
+              <!--<div id="tabChild-5">系统设置</div>-->
+              <ul class="lefter_kh_ul">
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '客户类别', {:controller=>"categories",:action=>"index",:cate=>"client_grade"},:menu_num=>0 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '客户性质', {:controller=>"categories",:action=>"index",:cate=>"nature"},:menu_num=>1 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '客户公海', {:controller=>"public_stores",:action=>"index"},:menu_num=>2 %>
+                </li>
+                <!--<li class="lefter_kh_li"><img src="<%#= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;-->
+                <!--<%#= link_to_menu_custom '个人客户库', {:controller=>"categories",:action=>"index",:cate=>"personal_store"},:menu_num=>0 %>-->
+                <!--</li>-->
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '客户来源', {:controller=>"categories",:action=>"index",:cate=>"client_origin"},:menu_num=>3 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '联系人性质', {:controller=>"categories",:action=>"index",:cate=>"contact_nature"},:menu_num=>4 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '搜索屏蔽字段', {:controller=>"categories",:action=>"index",:cate=>"shield"},:menu_num=>5 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '客户必填字段', {:controller=>"categories",:action=>"index",:cate=>"client_field"},:menu_num=>6 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '联系方式', {:controller=>"categories",:action=>"index",:cate=>"contact_way"},:menu_num=>7 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '服务方式', {:controller=>"categories",:action=>"index",:cate=>"serve_way"},:menu_num=>8 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '公司产品', {:controller=>"categories",:action=>"index",:cate=>"introduce_product"},:menu_num=>9 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '公司服务', {:controller=>"categories",:action=>"index",:cate=>"introduce_server"},:menu_num=>10 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '客户兴趣点', {:controller=>"categories",:action=>"index",:cate=>"interest_point"},:menu_num=>11 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '客户异议点', {:controller=>"categories",:action=>"index",:cate=>"dissent_point"},:menu_num=>12 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '无效联系备注', {:controller=>"categories",:action=>"index",:cate=>"@invalid_contact_description"},:menu_num=>13 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '联系结果', {:controller=>"categories",:action=>"index",:cate=>"contact_result"},:menu_num=>14 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '保护时间设置', {:controller=>"categories",:action=>"protect_time_index"},:menu_num=>15 %>
+                </li>
+                <!--<li class="lefter_kh_li"><img src="<%#= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;-->
+                <!--<%#= link_to_menu_custom '分配公海给员工', {:controller=>"not_category_settings",:action=>"user_public_store_index"},:menu_num=>0 %>-->
+                <!--</li>-->
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '设置保护客户数量', {:controller=>"not_category_settings",:action=>"protect_client_count_index"},:menu_num=>16 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '公司产品类别管理', {:controller=>"categories",:action=>"index",:cate=>"product_category"},:menu_num=>17 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '公司产品管理', {:controller=>"products",:action=>"index"},:menu_num=>18 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '资产类型', {:controller=>"categories",:action=>"index",:cate=>"asset_cate"},:menu_num=>19 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '采购方式', {:controller=>"categories",:action=>"index",:cate=>"purchase_way"},:menu_num=>20 %>
+                </li>
+              </ul>
+            </div>
+
+            <div id="tabPanel-6" style="display: none;height:300px;" class="secondary_menu">
+              <ul class="lefter_kh_ul">
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '订单列表', {:controller=>"orders",:action=>"index"},:menu_num=>0 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '订单列表(技术)', {:controller=>"order_develop_steps",:action=>"index"},:menu_num=>1 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '待分配订单', {:controller=>"order_develop_steps",:action=>"index",:cate=>0},:menu_num=>2 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '开发中的订单', {:controller=>"order_develop_steps",:action=>"index",:cate=>1},:menu_num=>3 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '已完成的订单', {:controller=>"order_develop_steps",:action=>"index",:cate=>2},:menu_num=>7 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '我的任务', {:controller=>"order_develop_steps",:action=>"my_develop_steps"},:menu_num=>4 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '审核中的任务', {:controller=>"order_develop_steps",:action=>"my_develop_steps",:cate=>1},:menu_num=>5 %>
+                </li>
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '我完成的任务', {:controller=>"order_develop_steps",:action=>"my_develop_steps",:cate=>2},:menu_num=>6 %>
+                </li>
+              </ul>
+            </div>
+
+            <div id="tabPanel-7" style="display: none;height:300px;" class="secondary_menu">
+              <ul class="lefter_kh_ul">
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '客服查询统计', {:controller=>"statistics",:action=>"serve"},:menu_num=>0 %>
+                </li>
+              </ul>
+              <ul class="lefter_kh_ul">
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '销售查询统计', {:controller=>"statistics",:action=>"sell"},:menu_num=>1 %>
+                </li>
+              </ul>
+            </div>
+            <div id="tabPanel-8" style="display: none;height:300px;" class="secondary_menu">
+              <ul class="lefter_kh_ul">
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom '固定资产列表', {:controller=>"assets",:action=>"index"},:menu_num=>0 %>
+                </li>
+                <!--<li class="lefter_kh_li"><img src="<%#= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;-->
+                  <!--<%#= link_to_menu_custom "新增资产",{:controller=>"assets",:action=>"create"},:menu_num=>1 %>-->
+                <!--</li>-->
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "供应商列表",{:controller=>"suppliers",:action=>"index"},:menu_num=>2 %>
+                </li>
+                <!--<li class="lefter_kh_li"><img src="<%#= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;-->
+                  <!--<%#= link_to_menu_custom "新增供应商",{:controller=>"suppliers",:action=>"create"},:menu_num=>3 %>-->
+                <!--&lt;!&ndash;</li>&ndash;&gt;-->
+                <!--<li class="lefter_kh_li"><img src="<%#= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;-->
+                  <!--<%#= link_to_menu_custom "新增低值易耗品",{:controller=>"assets",:action=>"create",:cate=>1},:menu_num=>4 %>-->
+                <!--</li>-->
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "耗材类办公用品",{:controller=>"stocks",:action=>"index"},:menu_num=>5 %>
+                </li>
+                <!--<li class="lefter_kh_li"><img src="<%#= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;-->
+                  <!--<%#= link_to_menu_custom "低值易耗品入库",{:controller=>"stocks",:action=>"create"},:menu_num=>6 %>-->
+                <!--</li>-->
+                <li class="lefter_kh_li"><img src="<%= asset_path("new_css_v1/libqaaa.png") %>" width="4" height="5" />&nbsp;&nbsp;
+                  <%= link_to_menu_custom "物品领用统计",{:controller=>"stocks",:action=>"index",:cate=>"use"},:menu_num=>7 %>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+  <td style="line-height:26px; background:url(<%= asset_path("new_css_v1/main_38.gif") %>)" align="center">
+    <a href="#"><font color="#ffffff"><b>导航栏</b></font></a></td>
+</tr>
+<tr>
+  <td height="45" id="main_menu">
+    <%= render :partial=>"/layouts/main_menu" %>
+  </td>
+</tr>
+</table></td>
+</tr>
+</table>
+<!--左边结束 -->
+
+
+</td>
+<td valign="top">
+
+  <!-- 中间右边 -->
+  <div id="youbiannr" style="margin:0 auto; padding:0px;height:500px;  overflow:auto;z-index: -99">
+    <table width="100%" border="0" align="center" cellpadding="0" cellspacing="0">
+      <!--<tr>-->
+        <!--<td height="30">-->
+          <!--&lt;!&ndash; 中间上面 &ndash;&gt;-->
+          <!--<table width="100%" border="0" cellspacing="0" cellpadding="0">-->
+            <!--<tr>-->
+              <!--<td width="15" height="30"><img src="<%#= asset_path("new_css_v1/tab_03.gif") %>" width="15" height="30" /></td>-->
+              <!--<td width="1101" background="<%#= asset_path("new_css_v1/tab_05.gif") %>">-->
+
+                <!--<span class="STYLE4">  </span>-->
+              <!--</td>-->
+              <!--<td width="281" background="<%#= asset_path("new_css_v1/tab_05.gif") %>">-->
+                <!--&lt;!&ndash; 在此写头部 &ndash;&gt;-->
+              <!--</td>-->
+              <!--<td width="14"><img src="<%#= asset_path("new_css_v1/tab_07.gif") %>" width="14" height="30" /></td>-->
+            <!--</tr>-->
+          <!--</table>-->
+          <!--&lt;!&ndash; 中间下面结束 &ndash;&gt;-->
+        <!--</td>-->
+      <!--</tr>-->
+      <tr>
+        <td>
+          <!-- 中间内容部分 -->
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td width="9" background="<%= asset_path("new_css_v1/tab_12.gif") %>">&nbsp;</td>
+              <td bgcolor="#f3ffe3">
+                <!-- 中间内容在此处写 -->
+                <div id="flash_notice" class="flash_notice"><%= notice %></div>
+                <div id="flash_alert" class="flash_alert"><%= alert %></div>
+                <div id="yield">
+                  <%= yield %>
+                </div>
+              </td>
+              <td width="9" background="<%= asset_path("new_css_v1/tab_16.gif") %>">&nbsp;</td>
+            </tr>
+          </table>
+          <!-- 中间内容部分结束 -->
+        </td>
+      </tr>
+      <tr>
+        <td height="29" style="z-index: -999">
+          <!-- 中间下面 -->
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td width="15" height="29"><img src="<%= asset_path("new_css_v1/tab_20.gif") %>" width="15" height="29" /></td>
+              <td width="1101" background="<%= asset_path("new_css_v1/tab_21.gif") %>">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td width="25%" height="29" nowrap="nowrap">
+                      <span class="STYLE1"><!--在此写共多少页的内容--></span>
+                    </td>
+                    <td width="75%" valign="top" class="STYLE1"><div align="right">
+                      <!--在此写分页 -->
+                    </div></td>
+                  </tr>
+                </table>
+              </td>
+              <td width="14"><img src="<%= asset_path("new_css_v1/tab_22.gif") %>" width="14" height="29" /></td>
+            </tr>
+          </table>
+          <!-- 中间下面结束 -->
+        </td>
+      </tr>
+    </table>
+
+  </div>
+  <!--右边边结束 -->
+
+</td>
+<td background="<%= asset_path("new_css_v1/main_42.gif") %>" style="width:3px;">&nbsp;</td>
+</tr>
+</table>
+
+<!--底部-->
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td height="24" background="<%= asset_path("new_css_v1/main_47.gif") %>"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="29" height="24"><img src="<%= asset_path("new_css_v1/main_45.gif") %>" width="29" height="24" /></td>
+        <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td width="369"><span class="STYLE1">版本 2012V1.0 </span></td>
+            <td width="814" class="STYLE1">&nbsp;</td>
+            <td width="185" nowrap="nowrap" class="STYLE1"><div align="center"><img src="<%= asset_path("new_css_v1/main_51.gif") %>" width="12" height="12" /> 如有疑问请与技术人员联系</div></td>
+          </tr>
+        </table></td>
+        <td width="14"><img src="<%= asset_path("new_css_v1/main_49.gif") %>" width="14" height="24" /></td>
+      </tr>
+    </table></td>
+  </tr>
+</table>
+
+</body>
+</html>

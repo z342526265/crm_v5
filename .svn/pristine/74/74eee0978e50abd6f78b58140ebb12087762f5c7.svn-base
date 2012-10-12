@@ -1,0 +1,114 @@
+<!--<div id="add_contact_list" style="display: none;">-->
+<%= form_for @serve_record,:url=>{:action=>"ajax_serve_record_create",:id=>@mini_client},
+             :remote=>true,:html=>{:id=>"ajax_serve_record_create_form"+@mini_client.id.to_s} do |f| %>
+    <table>
+      <tr>
+        <td>
+          <%= f.label :contact_person_id,"联系人" %>
+          <%= f.select :contact_person_id,@contact_people.map{|c|[c.name,c.id]} %><%= required_tag %>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <%= f.label :contact_way_id,"联系方式" %>
+          <%= f.select :contact_way_id,Category.find_all_by_cate("contact_way").map{|n|[n.name,n.id]} %><%= required_tag %>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <%= f.label :order_id,"服务的订单" %>
+          <%= f.select :order_id,@mini_client.orders.map{|o|[o.number,o.id]} %><%= required_tag %></td>
+      </tr>
+
+      <tr>
+        <td>
+          <%= "无效的联系" %>
+          <%= f.radio_button :contact_result_id,0,:onclick=>"display_items(this,'valid_contact','invalid_contact')" %>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <%= "有效的联系" %>
+          <%= f.radio_button :contact_result_id,1,:onclick=>"display_items(this,'valid_contact','invalid_contact')" %>
+        </td>
+      </tr>
+      <tr id="valid_contact" style="display: none;">
+        <td>
+          <%= f.label :content,"服务备注" %>
+          <%= f.text_area :content,:cols=>30,:rows=>3 %><%= required_tag %>
+        </td>
+      </tr>
+      <tr id="invalid_contact" style="display: none;">
+        <td>
+          <%= f.label :invalid_contact_description,"无效联系情况描述" %>
+          <%= f.text_field :invalid_contact_description %><%= required_tag %>
+        </td>
+      </tr>
+      <!--<tr id="serve_record_items2" style="display: none;">-->
+      <!--<td>-->
+      <!--备注：-->
+      <!--<%#= text_area_tag "serve_record[content2]",:cols=>30,:rows=>3 %><%#= required_tag %>-->
+      <!--</td>-->
+      <!--</tr>-->
+      <tr>
+        <td><%= f.submit "提交" %></td>
+        <!--<td colspan="2"><%#= f.submit "提交",:onclick=>"customAjaxSubmitContact('ajax_serve_record_create_form','#{'show-tab-3'+@mini_client.id.to_s}');return false;" %></td>-->
+      </tr>
+    </table>
+<% end %>
+<!--</div>-->
+
+<script type="text/javascript">
+
+    jQuery(document).ready(function(){
+
+        //自动可以选择也可以填写的输入框
+        $.getJSON("/categories/ajax_result_serve_record",{},function(result){
+            var invalid_contact_description = result
+            $(function() {
+                $('#serve_record_invalid_contact_description').autocomplete(invalid_contact_description, {
+                    max: 30,    //列表里的条目数
+                    minChars: 0,    //自动完成激活之前填入的最小字符
+                    width: 400,     //提示的宽度，溢出隐藏
+                    scrollHeight: 300,   //提示的高度，溢出显示滚动条
+                    matchContains: true,    //包含匹配，就是data参数里的数据，是否只要包含文本框里的数据就显示
+                    autoFill: false,    //自动填充
+                    formatItem: function(row, i, max) {
+                        return i + '/' + max + ':"' + row.name;
+                    },
+                    formatMatch: function(row, i, max) {
+                        return row.name
+                    },
+                    formatResult: function(row) {
+                        return row.name;
+                    }
+                }).result(function(event, row, formatted) {
+                        });
+            });
+        });
+
+
+        var mini_client_id = '<%= @mini_client.id.to_s %>'
+        $('#ajax_serve_record_create_form'+mini_client_id)
+                .bind("ajax:beforeSend", function(evt, xhr, settings){
+                    var field1=$("#serve_record_order_id").val();
+                    var field2=$("#serve_record_invalid_contact_description").val();
+                    var field3=$("#serve_record_content").val();
+                    var field4=$("input[type=radio]:checked").val();
+                    if(field3=="" && field4 == "1"){
+                        alert("服务备注不能为空！") ;
+                        return false;
+                    }
+                    if(field2=="" && field4 == "0"){
+                        alert("情况描述不能为空！") ;
+                        return false;
+                    }
+                })
+                .bind("ajax:success", function(evt, data, status, xhr){
+                    $("#show-tab-3"+mini_client_id).html(data);
+                    alert("保存成功！");
+                })
+
+    })
+
+</script>

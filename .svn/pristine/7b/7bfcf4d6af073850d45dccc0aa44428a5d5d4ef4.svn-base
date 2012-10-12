@@ -1,0 +1,61 @@
+<table width="100%"  class="kehuliebiaoys">
+
+  <tr>
+    <th>全选<br /><input type="checkbox" name="chk_all" id="chk_all" /></th>
+    <th>名称</th>
+    <!--<th>地址</th>-->
+    <!--<th>行业</th>-->
+    <th>类别</th>
+    <th>服务状态</th>
+    <th>最近一次服务时间</th>
+    <th>最近一次服务内容</th>
+    <th>客服1</th>
+    <!--<th>客服2</th>-->
+    <th colspan="4">操作</th>
+  </tr>
+  <%#= form_tag "/clients/multi_process?cate_id=#{@current_category.id}" do %>
+
+  <% @mini_clients.each do |client| %>
+      <tr id='<%= "client_tr"+client.id.to_s %>'>
+        <td><%= check_box_tag "client_ids[]", client.id %><%= client.number %></td>
+        <% tab_name = (client.name.gsub(@shield_fields_regular,"")[0,6]) rescue "-" %>
+        <!--<td><%#= link_to_custom client.name,{:controller=>"mini_clients",:action=>"ajax_show",:id=>client},:onclick=>"showTab(this,'/mini_clients/ajax_show?id=#{client.id}','#{tab_name}');return false;",:remote=>true,:name=>client.id %></td>-->
+        <td><a href="#" name="<%= client.id %>" onclick="showTab(this,'/mini_clients/ajax_show?id=<%= client.id %>','<%= tab_name %>');return false;"><%= client.name %></a> </td>
+        <!--<td><%#= client.address %></td>-->
+        <!--<td><%#= client.trade %></td>-->
+        <td><%= client.client.grade_text %></td>
+        <td><%= client.serve_status_text %></td>
+        <% serve_record = client.serve_records.first %>
+        <td><%= time_format((serve_record.present? ? serve_record.created_at : "不存在联系记录")) %></td>
+        <td><%= truncate((serve_record.present? ? serve_record.contact_result_text : "不存在联系记录"),:length=>50) %></td>
+        <td><%= client.serve_user1_name %></td>
+        <!--<td><%#= client.serve_user2_name %></td>-->
+        <td colspan="4">
+          <%= form_tag "/mini_clients/distribute_client_to_server?mini_client_id=#{client.id}",:remote=>true,:class=>"distribute_client_to_server" do %>
+              把客户分配给：<%= select_tag "user_id",options_from_collection_for_select(User.subordinate_users(@current_user), "id", "name") %>
+              <%= submit_tag "提交" %>
+          <% end %>
+        </td>
+      </tr>
+  <% end %>
+</table>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".distribute_client_to_server")
+                .bind("ajax:beforeSend", function(evt, xhr, settings){
+                    if(!confirm("确定？")){
+                        return false;
+                    }
+                })
+                .bind("ajax:success", function(evt, data,status, xhr){
+                    if(data=="failed"){
+                        alert("未分配成功！")
+                    }else{
+                        $("#ajax_index_table_v3").html(data);
+                        alert("分配成功！");
+                    }
+
+                })
+    })
+</script>

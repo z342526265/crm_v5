@@ -1,0 +1,520 @@
+# encoding: utf-8
+class MiniClientsController < ApplicationController
+
+  #我的客户库
+  def index
+    if params[:public_store_id].blank?
+      if request.xhr?
+        render :text=>"参数错误"
+      else
+        redirect_to :back
+        flash[:alert] = "参数错误！"
+      end
+    else
+      @public_store = PublicStore.find(params[:public_store_id])
+      if params["name_like"].blank?
+        @mini_clients = @public_store.mini_clients.includes(:client).where("mini_clients.status_num=?",0).page(params[:page]).per(@every_page_count)
+      else
+        @mini_clients = @public_store.mini_clients.includes(:client).where("mini_clients.status_num=? and clients.name like ?",0,"%"+params[:name_like]+"%").page(params[:page]).per(@every_page_count)
+      end
+    end
+
+  end
+
+  #客户列表页面弹出客户资料
+  def show
+    @mini_client = MiniClient.find(params[:id])
+    render :partial => "mini_clients/show",:locals => {:client=>@mini_client}
+  end
+
+  # 新建客户
+  def new
+    @client = params[:client_id] ? Client.find(params[:client_id]) : Client.create!
+    @mini_client = @client.mini_clients.build
+    @client_fields = Category.find_by_cate("client_field").description.split(",") + ["name","nature_id","origin_id","grade_id"]
+  end
+
+  #创建客户
+  def create
+
+    @client = Client.find(params[:client_id]) rescue nil
+    @client_fields = Category.find_by_cate("client_field").description.split(",") + ["name","nature_id","origin_id","grade_id"]
+    if @client.blank?
+      redirect_to :action=>:new
+      flash[:alert] = "由于您长时间未操作，数据已经失效，请重新填写！"
+    else
+      params[:mini_client][:province] = params[:sel0]
+      params[:mini_client][:city] = params[:sel1]
+      params[:mini_client][:district] = params[:sel2]
+      @mini_client = @client.mini_clients.build
+      attrs = params[:mini_client]
+      #fields = Category.find_by_cate("client_field").description.split(",") + ["name","nature_id","origin_id","grade_id"]
+      if @client_fields.any?{|f|attrs[f].blank?}
+        @error_messages = "必填字段不能为空！"
+        render :action=>"new"
+      elsif attrs[:tel].blank? && attrs[:mobile].blank?
+        @error_messages = "手机或电话必须填写一个！"
+        render :action=>"new"
+      else
+        @mini_client.update_attributes(params[:mini_client])
+        if @mini_client.save
+          redirect_to :action=>"my_follow_clients",:controller => "mini_clients"
+          flash[:notice] = '客户新建成功.'
+        else
+          render :action => "new"
+        end
+      end
+    end
+  end
+
+  def ajax_search
+    regular_string = Category.find_by_cate("shield").description.split(",")
+    name_like = params[:name]
+    regular_string.each do |w|
+      name_like.gsub!(w,"")
+    end
+    if name_like == ""
+      @clients = []
+    else
+      @clients = Client.includes(:mini_clients).search({"name_like"=>name_like}).page(params[:page]).per(@every_page_count)
+    end
+    render :partial => "shared/mini_clients/search_result"
+  end
+
+  #查看电话号码是否重复
+  def ajax_mobile_search
+    mobile = params[:mobile]
+    if mobile == ""
+      @contact_lists = []
+    else
+      @contact_lists = ContactPerson.search({"mobile_like"=>mobile}).page(params[:page]).per(@every_page_count)
+    end
+    render :partial => "shared/mini_clients/mobile_search_result"
+  end
+
+
+
+  #导出客户模版
+  def client_export_template
+    respond_to do |format|
+      format.csv do
+        require 'csv'
+        require 'string'
+        csv_string = CSV.generate do |csv|
+          csv << Client::COLUMN_LABELS
+        end
+        send_data(csv_string.utf8_to_gb2312, :type => 'text/csv; charset=gb2312; header=present', :filename => "client_template_export.csv")
+      end
+    end
+  end
+
+
+  #csv格式客户资料导入
+  def client_import
+    return if request.get?
+    if params[:import_file].original_filename[-4,4] != ".csv"
+      redirect_to :back
+      flash[:alert] = "导入文件格式必须为csv格式"
+      return false
+    end
+    require "csv"
+    #pp params
+    #pp "++++++++++++"
+    rows = CSV.parse(params[:import_file].tempfile)
+    is_utf8 = rows[0].join(',').utf8?
+    succe_num = 0
+    rows.each_with_index do |row,i|
+      next if i == 0
+      row = row.map {|v| v.blank? ? v : v.gb2312_to_utf8 } unless is_utf8
+      attrs = {:nature_id=>params[:nature_id],:grade_id=>params[:grade_id],:origin_id=>params[:origin_id],:public_store_id=>params[:public_store_id]}
+      Client::COLUMN_ATTRS.each_with_index do |attr,i|
+        attrs[attr]=row[i]
+      end
+
+      @client = Client.create!
+      @mini_client = @client.mini_clients.build
+      @mini_client.update_attributes(attrs)
+      if @mini_client.save
+        succe_num += 1
+      end
+    end
+    redirect_to :back
+    flash[:notice] = "#{succe_num}个客户导入成功"
+  end
+
+
+  #批量处理
+  #把选中的客户加入我的客户库
+  def multi_process
+    # if MiniClient.where("id in (?)",params[:mini_client_ids]).update_all({"user_id"=>@current_user.id,"status_num"=>2})
+    MiniClient.transaction do
+      MiniClient.where("id in (?)",params[:mini_client_ids]).each do |m|
+        m.update_attributes(:user_id=>@current_user.id,:status_num=>2)
+      end
+    end
+    redirect_to :back
+    flash[:notice] = "处理成功！"
+  end
+
+  #我的客户库页面
+  def my_follow_clients
+    @search = MiniClient.search(params[:search])
+    render :template => "/shared/mini_clients/mini_client_ajax_index"
+  end
+
+  #我的客户加载action
+  #新的ajax_index页面
+  #通过ajax返回index页面
+  def ajax_index_v2
+    @search = MiniClient.includes(:client).search(params[:search])
+    set_ajax_index_data([1,2,3])
+    render :partial => "/mini_clients/ajax_index/ajax_index_v2"
+  end
+
+  #ajax_分页加载
+  def ajax_index_table_v2
+    @search = MiniClient.includes(:client).search(:client_name_or_client_number_like => params[:search_val])
+    set_ajax_index_data([1,2,3])
+    render :partial => "/mini_clients/ajax_index/ajax_index_table_v2"
+  end
+
+
+  #我的成单客户库页面
+  def my_clients_of_had_orders
+    @search = MiniClient.search(params[:search])
+    render :template => "/shared/mini_clients/mini_client_ajax_index"
+  end
+
+  #我的客户加载action
+  #新的ajax_index页面
+  #通过ajax返回index页面
+  def ajax_index_v3
+    @search = MiniClient.includes(:client).search(params[:search])
+    set_ajax_index_data([4])
+    render :partial => "/mini_clients/ajax_index/ajax_index_v3"
+  end
+
+  #通过ajax分页加载的内容
+  def ajax_index_table_v3
+    @search = MiniClient.includes(:client).search(:client_name_or_client_number_like => params[:search_val])
+    set_ajax_index_data([4])
+    render :partial => "/mini_clients/ajax_index/ajax_index_table_v3"
+  end
+
+  #我服务的客户
+  def my_serve_clients
+    @search = MiniClient.search(params[:search])
+    render :template => "/shared/mini_clients/mini_client_ajax_index"
+  end
+
+  #我的客户加载action
+  #新的ajax_index页面
+  #通过ajax返回index页面
+  def ajax_index_v4
+    @search = MiniClient.includes(:client,:serve_records).search(params[:search])
+    set_ajax_index_data_v4
+    render :partial => "/mini_clients/ajax_index/ajax_index_v4"
+  end
+
+  #通过ajax返回index页面
+  def ajax_index_table_v4
+    @search = MiniClient.includes(:client,:serve_records).search(:client_name_or_client_number_like => params[:search_val])
+    set_ajax_index_data_v4
+    render :partial => "/mini_clients/ajax_index/ajax_index_table_v4"
+  end
+
+  #分配成单客户给客服
+  def distribute_client_to_server
+    if request.post?
+      @mini_client = MiniClient.find(params[:mini_client_id])
+      @mini_client.serve_user1_id = params[:user_id]
+      if @mini_client.save
+        shield_fields_array = Category.find_by_cate("shield").description.split(",")
+        @shield_fields_regular = Regexp.union(shield_fields_array)
+        if @current_user.had_permission?(30)
+          @mini_clients_count = MiniClient.where("status_num = ?",4).count
+          @mini_clients = MiniClient.where("status_num = ?",4).page(params[:page]).per(@every_page_count)
+        else
+          users = User.subordinate_users(@current_user)
+          user_ids = users.map{|u|u.id}
+          @mini_clients_count = MiniClient.where("(serve_user1_id in (?) or serve_user2_id in (?)) and status_num = ?",user_ids,user_ids,4).count
+          @mini_clients = MiniClient.where("(serve_user1_id in (?) or serve_user2_id in (?)) and status_num = ?",user_ids,user_ids,4).page(params[:page]).per(@every_page_count)
+        end
+        render :partial => "/mini_clients/ajax_index/ajax_index_table_v4"
+      else
+        render :text=>"failed"
+      end
+    end
+  end
+
+
+  #把客户退回公海
+  def remove_to_public_personal_store
+    @mini_client = MiniClient.find(params[:id])
+    if @mini_client.update_attribute(:status_num,0)
+      shield_fields_array = Category.find_by_cate("shield").description.split(",")
+      @shield_fields_regular = Regexp.union(shield_fields_array)
+      users = User.subordinate_users(@current_user)
+      @mini_clients_count =  MiniClient.where("user_id in (?) and status_num in (?)",users.map{|u|u.id},[1,2,3]).count
+      @mini_clients = MiniClient.where("user_id in (?) and status_num in (?)",users.map{|u|u.id},[1,2,3]).page(params[:page]).per(@every_page_count)
+      render :partial => "/mini_clients/ajax_index/ajax_index_table_v2"
+    else
+      render :text=>"failed"
+    end
+  end
+
+
+  #把客户加入意向库(保护库)
+  def add_to_had_intention_personal_store
+    @mini_client = MiniClient.find(params[:id])
+    if @mini_client.update_attribute(:status_num,3)
+      shield_fields_array = Category.find_by_cate("shield").description.split(",")
+      @shield_fields_regular = Regexp.union(shield_fields_array)
+      users = User.subordinate_users(@current_user)
+      @mini_clients_count =  MiniClient.where("user_id in (?) and status_num in (?)",users.map{|u|u.id},[1,2,3]).count
+      @mini_clients = MiniClient.where("user_id in (?) and status_num in (?)",users.map{|u|u.id},[1,2,3]).page(params[:page]).per(@every_page_count)
+      render :partial => "/mini_clients/ajax_index/ajax_index_table_v2"
+    else
+      render :text=>"failed"
+    end
+  end
+
+
+  #ajax_show
+  #详情页面
+  #通过ajax返回index页面
+  def ajax_show
+    @mini_client = MiniClient.find(params[:id])
+    @contact_people = @mini_client.contact_people
+    condition_string = @current_user.is_expert? ? "" : "created_user_id = #{@current_user.id}"
+    @contact_records = @mini_client.contact_records.where(condition_string)
+    @serve_records = @mini_client.serve_records.includes(:order)
+    @order_items = @mini_client.order_items.includes(:order).where("orders.check_status = ?",0).group_by{|item|item.order}
+    @checking_orders = @mini_client.orders.includes(:order_items).where("check_status != ?",0)
+    @contact_reminds = @mini_client.contact_reminds.where(['user_id=?',@current_user.id])
+    render :partial => "/mini_clients/ajax_show/ajax_show"
+  end
+
+  #更新基本信息
+  def ajax_update_client
+    @mini_client = MiniClient.find(params[:id])
+    if request.get?
+      render :partial => "/mini_clients/ajax_show/client_information/ajax_update_client"
+    else
+      if @mini_client.update_attributes(params[:mini_client])
+        render :partial=>"/mini_clients/ajax_show/client_information/basic_information",:locals=>{:client=>@mini_client}
+      else
+        render :text => "failed"
+      end
+    end
+  end
+
+  #编辑日志弹出框内容
+  def ajax_client_update_log
+    @mini_client = MiniClient.find(params[:id])
+    @client_update_logs = @mini_client.client.update_logs
+    @client_update_logs = @client_update_logs - [(@client_update_logs.first)]
+    render :partial=>"/shared/update_log/ajax_update_log",:locals=>{:update_logs=>@client_update_logs}
+  end
+
+  #改变客户类别
+  def update_grade
+    @mini_client = MiniClient.find(params[:id])
+    @client = @mini_client.client
+    grade_id = params[:client][:grade_id]
+    @grade = Category.find(grade_id)
+    if @grade.need_verify? && @client.grade_id != grade_id
+      ActiveRecord::Base.transaction do
+        @check_item = @client.check_items.build(:attrs=>{:grade_id=>grade_id},:name=>"客户#{@client.name}类别改变审核",:description=>"客户#{@client.name}类别申请改变为#{@grade.name},需要审核！")
+        @check_item.save
+        @check_item.users = Permission.find_by_cate(29).users
+      end
+      redirect_to :back
+      flash[:notice] = "所需更改经过审核,如果审核通过,更改才能完成。请等待审核结果。"
+    else
+      @client.update_attributes(params[:client])
+      redirect_to :back
+      flash[:notice] = '更新成功.'
+    end
+  end
+
+  #增加联系人
+  def ajax_submit_contact
+    @mini_client = MiniClient.find(params[:id])
+    if request.get?
+      @contact_person = @mini_client.contact_people.build
+      render :partial=>"/mini_clients/ajax_show/contact_person/ajax_add_contact_person"
+    else
+      @contact_person = @mini_client.contact_people.build(params[:contact_person])
+      if @contact_person.save
+        @contact_people = @mini_client.contact_people.reload
+        render :partial=>"/mini_clients/ajax_show/contact_person/contact_person"
+      else
+        render :text => "failed"
+      end
+    end
+  end
+
+  #更新联系人
+  def ajax_update_contact_list
+    @mini_client = MiniClient.find(params[:id])
+    @contact_person = @mini_client.contact_people.find(params[:contact_person_id])
+    if request.get?
+      render :partial=>"/mini_clients/ajax_show/contact_person/ajax_update_contact_person"
+    else
+      if @contact_person.update_attributes(params[:contact_person])
+        @contact_people = @mini_client.contact_people.reload
+        render :partial=>"/mini_clients/ajax_show/contact_person/contact_person"
+      else
+        render :text => "failed"
+      end
+    end
+  end
+
+  #删除联系人
+  def ajax_destroy_client_list
+    @contact_person = ContactPerson.find(params[:id])
+    @contact_person.destroy
+    render :nothing => true
+  end
+
+  #编辑联系人历史记录弹出框内容
+  def ajax_contact_list_update_log
+    @mini_client = MiniClient.find(params[:id])
+    @contact_person = @mini_client.contact_people.find(params[:contact_person_id])
+    @contact_list_update_logs = @contact_person.update_logs
+    render :partial=>"/shared/update_log/ajax_update_log",:locals=>{:update_logs=>@contact_list_update_logs}
+  end
+
+
+  #创建联系记录
+  def ajax_create_contact_record
+    @mini_client = MiniClient.find(params[:id])
+    if request.get?
+      @contact_record = @mini_client.contact_records.build
+      @contact_people = @mini_client.contact_people
+      render :partial=>"/mini_clients/ajax_show/contact_record/ajax_add_contact_record"
+    else
+      @contact_record = @mini_client.contact_records.build(params[:contact_record])
+      if @contact_record.save
+        @contact_people = @mini_client.contact_people
+        condition_string = @current_user.is_expert? ? "" : "created_user_id = #{@current_user.id}"
+        @contact_records = @mini_client.contact_records.where(condition_string)
+        render :partial=>"/mini_clients/ajax_show/contact_record/contact_record"
+      else
+        render :text => "failed"
+      end
+    end
+  end
+
+  #展示所有联系记录
+  def ajax_show_contact_records
+    @mini_client = MiniClient.find(params[:id])
+    condition_string = @current_user.is_expert? ? "" : "created_user_id = #{@current_user.id}"
+    @contact_records = @mini_client.contact_records.where(condition_string).page(1).per(10)
+    render :partial => "/mini_clients/ajax_show/contact_record/ajax_show_contact_records"
+  end
+
+
+
+  #服务小记==============================================
+  #创建服务小记
+  #编辑服务小记
+  def ajax_serve_record_create
+    @mini_client = MiniClient.find(params[:id])
+    if request.get?
+      @contact_people = @mini_client.contact_people
+      @serve_record = @mini_client.serve_records.build
+      render :partial=>"/mini_clients/ajax_show/serve_record/ajax_serve_record_create"
+    else
+      @serve_record = @mini_client.serve_records.build(params[:serve_record])
+      if @serve_record.save
+        @serve_records = @mini_client.serve_records.reload
+        render :partial=>"/mini_clients/ajax_show/serve_record/serve_record"
+      else
+        render :text => "failed"
+      end
+    end
+  end
+
+  def ajax_serve_record_update
+    @mini_client = MiniClient.find(params[:id])
+    @serve_record = @mini_client.serve_records.find(params[:serve_record_id])
+    if request.get?
+      @contact_people = @mini_client.contact_people
+      render :partial=>"/mini_clients/ajax_show/serve_record/ajax_serve_record_update"
+    else
+      if @serve_record.update_attributes(params[:serve_record])
+        @serve_records = @mini_client.serve_records.reload
+        render :partial=>"/mini_clients/ajax_show/serve_record/serve_record"
+      else
+        render :text => "failed"
+      end
+    end
+  end
+
+  def ajax_serve_record_destroy
+    @mini_client = MiniClient.find(params[:id])
+    @serve_record = @mini_client.serve_records.find(params[:serve_record_id])
+    if @serve_record.destroy
+      render :text => "删除成功！"
+    else
+      render :text => "failed"
+    end
+  end
+
+  #展示所有联系记录
+  def ajax_serve_records_show
+    @mini_client = MiniClient.find(params[:id])
+    @serve_records = @mini_client.serve_records.page(1).per(10)
+    render :partial => "/mini_clients/ajax_show/serve_record/ajax_serve_records_show"
+  end
+
+
+  #录音播放
+  def play_record
+
+    case params[:cate]
+      when "serve"
+        @serve_record = ServeRecord.includes(:contact_person,:created_user).find(params[:serve_id])
+      when "contact"
+        @serve_record = ContactRecord.includes(:contact_person,:created_user).find(params[:serve_id])
+    end
+    return unless @serve_record
+    c_date = @serve_record.created_at.to_date
+    c_work_tel_number = @serve_record.created_user.work_tel_number
+
+    @contact_person = @serve_record.contact_person
+    c_tel = @contact_person.tel.present? ? @contact_person.tel : "false"
+    c_mobile = @contact_person.mobile.present? ? @contact_person.mobile : "false"
+    @tel_records = TelRecord.where("(tel_date = ? and work_tel_number = ?) and (file_name like ? or file_name like ?)",c_date,c_work_tel_number,"%#{c_tel}%","%#{c_mobile}%")
+    render :json=>@tel_records.map{|t|t.path}
+  end
+
+
+  private
+  def set_ajax_index_data(arr=[])
+    shield_fields_array = Category.find_by_cate("shield").description.split(",")
+    @shield_fields_regular = Regexp.union(shield_fields_array)
+    users = User.subordinate_users(@current_user)
+    @mini_clients_count =  @search.where("mini_clients.user_id in (?) and mini_clients.status_num in (?)",users.map{|u|u.id},arr).count
+    @mini_clients = @search.where("mini_clients.user_id in (?) and mini_clients.status_num in (?)",users.map{|u|u.id},arr).order(params[:sort]).page(params[:page]).per(@every_page_count)
+  end
+
+
+  def set_ajax_index_data_v4
+    shield_fields_array = Category.find_by_cate("shield").description.split(",")
+    @shield_fields_regular = Regexp.union(shield_fields_array)
+
+    if @current_user.had_permission?(30)
+      @mini_clients_count = @search.where("mini_clients.status_num = ?",4).count
+      @mini_clients = @search.where("mini_clients.status_num = ?",4).order(params[:sort]).page(params[:page]).per(@every_page_count)
+    else
+      users = User.subordinate_users(@current_user)
+      user_ids = users.map{|u|u.id}
+      @mini_clients_count = @search.where("(mini_clients.serve_user1_id in (?) or mini_clients.serve_user2_id in (?)) and mini_clients.status_num = ?",user_ids,user_ids,4).count
+      @mini_clients = @search.where("(mini_clients.serve_user1_id in (?) or mini_clients.serve_user2_id in (?)) and mini_clients.status_num = ?",user_ids,user_ids,4).order(params[:sort]).page(params[:page]).per(@every_page_count)
+    end
+  end
+
+end

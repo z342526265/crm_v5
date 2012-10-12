@@ -1,0 +1,141 @@
+# encoding: utf-8
+class OrdersController < ApplicationController
+
+  def index
+    if params[:search_number_like].present?
+      @orders = Order.includes(:order_items).where("orders.number like ?","%"+params[:search_number_like]).page(params[:page]).per(@every_page_count)
+      #@order_items = OrderItem.includes(:order).where("orders.number like ?","%"+params[:search_number_like]).page(params[:page]).per(@every_page_count).group_by{|item|item.order}
+    else
+      @orders = Order.includes(:order_items).page(params[:page]).per(@every_page_count)
+
+      #@order_items = OrderItem.page(params[:page]).per(@every_page_count).group_by{|item|item.order}
+    end
+    @number_like = params[:search_number_like]
+  end
+
+  def create
+    @mini_client = MiniClient.find(params[:mini_client_id])
+    @products = Product.all
+    if  request.get?
+      @order = @mini_client.orders.build({:created_user_id=>@current_user.id})
+      @contact_people = @mini_client.contact_people
+    else
+      @order = @mini_client.orders.build(params[:order])
+      result = true
+      begin
+        ActiveRecord::Base.transaction do
+          @order.save!
+          OrderItem.custom_build(@order,params[:order_items])
+          @mini_client.update_attribute(:status_num,4)
+        end
+      rescue
+        result = false
+      end
+      if result
+        redirect_to :controller => "mini_clients",:action=>"my_serve_clients"
+      else
+        redirect_to :back
+        flash[:alert] = "产品不能为空！"
+      end
+    end
+  end
+
+  def ajax_apply_destroy
+    return unless request.delete?
+    @order = Order.find(params[:id])
+    @order.destroy
+    @orders = Order.includes(:order_items).page(params[:page]).per(@every_page_count)
+    redirect_to :action=>"index"
+    #ActiveRecord::Base.transaction do
+    #  # cate=>2表示这是一个删除操作的审核
+    #  @check_item = @order.check_items.build(:attrs=>{},
+    #                                         :name=>"#{@current_user.name}申请删除订单#{@order.number}",
+    #                                         :description=>"#{@current_user.name}申请删除订单#{@order.number}，请您审核！",
+    #                                         :cate=>2)
+    #  @check_item.save
+    #  @check_item.users << @check_item.users << User.have_permission("orders-check")
+    #  @order.update_attribute(:check_status,2)
+    #end
+    #render :nothing => true
+  end
+
+  #申请修改订单
+  def ajax_apply_update
+    @order = Order.find(params[:id])
+    @client = @order.client
+    if request.get?
+      @products = Product.all
+      render :partial => "ajax_update"
+    else
+      ActiveRecord::Base.transaction do
+        @order.update_attributes(params[:order])
+        @order.order_items.delete_all
+        OrderItem.custom_build(@order,params[:order_items])
+      end
+      render :partial => "index_tr",:locals => {:order=>@order}
+    end
+  end
+
+  def ajax_show
+    @order = Order.includes(:order_items).find(params[:id])
+    render :partial=>"ajax_show"
+  end
+
+  def ajax_index
+    @orders = Order.includes(:order_items).all
+    render :partial => "orders/ajax_index"
+  end
+
+  def ajax_create
+    @mini_client = MiniClient.find(params[:mini_client_id])
+    @products = Product.all
+    if request.get?
+      @order = @mini_client.orders.build({:created_user_id=>@current_user.id})
+      @contact_people = @mini_client.contact_people
+      render :partial => "/mini_clients/ajax_show/order/ajax_create"
+    else
+      @order = @mini_client.orders.build(params[:order])
+      ActiveRecord::Base.transaction do
+        @order.save!
+        OrderItem.custom_build(@order,params[:order_items])
+        @mini_client.update_attribute(:status_num,4)
+      end
+      #@orders = @mini_client.orders
+      @order_items = @mini_client.order_items.group_by{|item|item.order}
+      render :partial => "/mini_clients/ajax_show/order/order_index"
+    end
+  end
+
+  #修改订单，订单项
+  def ajax_update_order_item
+    @mini_client = MiniClient.find(params[:mini_client_id])
+    @order_item = OrderItem.find(params[:order_item_id])
+    if request.get?
+      @products = Product.all
+      render :partial => "/mini_clients/ajax_show/order/ajax_update_order_item"
+    else
+      @order_item.update_attributes(params[:order_item])
+      @order_item.paid_items.delete_all
+      @order_item.paid_items.create(:received_amount=>params[:order_item][:received_amount])
+      #PaidItem.create(:received_amount=>params[:order_item][:received_amount],:order_item_id=>@order_item.id)
+      #@order_item.paid_items.first.update_attributes(:received_amount=>params[:order_item][:received_amount])
+      @order_items = @mini_client.order_items.group_by{|item|item.order}
+      render :partial => "/mini_clients/ajax_show/order/order_index"
+    end
+  end
+
+  #增加付款项
+  def add_paid_item
+    @order_item = OrderItem.find(params[:id])
+    @paid_item= @order_item.paid_items.build(params[:paid_item])
+    @paid_item.save!
+    @mini_client = @order_item.order.mini_client
+    #@orders = @mini_client.orders
+    @order_items = @mini_client.order_items.group_by{|item|item.order}
+    render :partial => "/mini_clients/ajax_show/order/order_index"
+  end
+
+
+
+
+end

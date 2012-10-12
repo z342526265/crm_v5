@@ -1,0 +1,7 @@
+<h1>编辑公海</h1>
+
+<%= form_for(@public_store,:url=>{:controller => "public_stores",:action=>"update",:id=>@public_store}) do |f| %>
+    <%= render :partial =>  'form',:locals=>{:f=>f} %>
+<% end %>
+
+<%= link_to_custom '返回',:controller=>"public_stores", :action=>"index" %>

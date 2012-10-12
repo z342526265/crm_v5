@@ -1,0 +1,60 @@
+<!--<div id="add_contact_list" style="display: none;">-->
+<%= form_for :contact_person,:url=>{:controller=>"mini_clients",:action=>"ajax_submit_contact",:id=>@mini_client},:remote=>true,:html=>{:id=>"add_contact_list_form"+@mini_client.id.to_s} do |f| %>
+    <%= f.error_messages %>
+    <table>
+      <tr>
+        <td><%= f.label :name,"姓名" %></td>
+        <td align="left"><%= f.text_field :name %><%= required_tag %></td>
+        <td><%= f.label :sex,"性别" %></td>
+        <td align="left"><%= f.select :sex,[["未知",0],["男",1],["女",2]] %></td>
+      </tr>
+      <tr>
+        <td><%= f.label :contact_nature_id,"属性" %></td>
+        <td align="left"><%= f.select :contact_nature_id, Category.find_all_by_cate("contact_nature").map{|c|[c.name,c.id]} %></td>
+        <td><%= f.label :position,"职务" %></td>
+        <td align="left"><%= f.text_field :position %></td>
+      </tr>
+      <tr>
+        <td><%= f.label :mobile,"手机" %></td>
+        <td align="left"><%= f.text_field :mobile %></td>
+        <td><%= f.label :tel,"电话" %></td>
+        <td align="left"><%= f.text_field :tel %></td>
+      </tr>
+      <tr>
+        <td><%= f.label :email,"电子邮箱" %></td>
+        <td  align="left"><%= f.text_field :email %></td>
+        <td><%= f.label :qq,"即时通讯" %></td>
+        <td  align="left"><%= f.text_field :qq %></td>
+      </tr>
+      <tr>
+        <td><%= f.label :description,"备注" %></td>
+        <td colspan="3"  align="left"><%= f.text_area :description,:cols=>45,:rows=>1 %></td>
+      </tr>
+      <tr>
+        <td colspan="4"><%= f.submit "提交" %></td>
+      </tr>
+    </table>
+<% end %>
+<!--</div>-->
+
+<script type="text/javascript">
+    var client_id = '<%= @mini_client.id %>'
+    $("#add_contact_list_form"+client_id)
+            .bind("ajax:beforeSend", function(evt, xhr, settings){
+                var name=$("#contact_person_name").val();
+                var mobile=$("#contact_person_mobile").val();
+                var tel=$("#contact_person_tel").val();
+                if(name==""){
+                    alert("姓名不能为空");
+                    return false;
+                }
+                if(mobile=="" && tel==""){
+                    alert("手机、电话必须填写一个！") ;
+                    return false;
+                }
+            })
+            .bind("ajax:success", function(evt, data, status, xhr){
+                $("#"+'show-tab-1'+client_id).html(data);
+                alert("增加成功！")
+            })
+</script>

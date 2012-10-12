@@ -1,0 +1,22 @@
+<% # encoding: utf-8 %>
+
+<h2><%= params[:cate] == 1 ? "新建低值易耗品" : "新增资产" %></h2>
+<br />
+
+<%= form_for @asset,:url=>{:controller=>"assets",:action=>"create"} do |f| %>
+    <% tem = params[:cate] == "1" ? "dizhiyihao_form" : "form" %>
+    <%= render :partial => tem,:locals => {:f=>f} %>
+<% end %>
+
+ <script type="text/javascript">
+   $(document).ready(function(){
+//       $("#asset_form")
+//               .bind("ajax:beforeSend",function(){
+//                   alert("1111") ;
+//
+//               })
+//               .bind("ajax:success",function(evt,data){
+//                    alert(data);
+//               })
+   })
+ </script>

@@ -1,0 +1,35 @@
+<%# encoding: utf-8%>
+<h1>部门列表</h1>
+
+<table class="bmliebiao">
+  <tr>
+    <th>部门名称</th>
+    <th>部门负责人</th>
+    <th>上级部门</th>
+    <th>部门描述</th>
+    <th>部门级别</th>
+    <th>下级部门</th>
+    <th>包含岗位</th>
+    <th colspan="4">操作</th>
+  </tr>
+
+<% @departments.each do |department| %>
+  <tr>
+    <td><%= department.name %></td>
+    <td><%= department.managers_names %></td>
+    <td><%= department.parent_name %></td>
+    <td><%= department.description %></td>
+    <td><%= department.cate %></td>
+    <td><%= department.subordinate_departments_names %></td>
+    <td><%= department.positions_names %></td>
+    <td><%= link_to_custom '详情', :controller=>"departments",:action=>"show",:id=>department %></td>
+    <td><%= link_to_custom '编辑', :controller=>"departments",:action=>"edit",:id=>department %></td>
+    <td><%= link_to_custom '删除', {:controller=>"departments",:action=>"destroy",:id=>department},:method=>:delete,:confirm=>"确认删除" %></td>
+    <td><%= link_to_custom '职位', :controller=>"positions",:action=>"index",:department_id=>department %></td>
+  </tr>
+<% end %>
+</table>
+<%= paginate @departments %>
+<br />
+
+<%= link_to_custom '新增部门', :controller=>"departments",:action=>"new" %>

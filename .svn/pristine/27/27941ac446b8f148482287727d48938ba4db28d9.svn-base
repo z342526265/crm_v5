@@ -1,0 +1,10 @@
+<h2>编辑员工信息</h2>
+
+<%= form_for(@user,:html => { :multipart => true } ) do |f| %>
+
+    <%=  render :partial=>"form",:locals=>{:f=>f} %>
+
+    <div><%= f.submit "更新" %></div>
+<% end %>
+
+<%= link_to_custom "返回", :back %>

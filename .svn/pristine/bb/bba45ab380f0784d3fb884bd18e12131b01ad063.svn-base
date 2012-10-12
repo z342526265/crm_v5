@@ -1,0 +1,35 @@
+# encoding: utf-8
+class ServeRecord < ActiveRecord::Base
+  # attr_accessible :title, :body
+
+  include SetCreatedUser
+  include CustomAssociationMethod
+
+
+
+  #belongs_to :create_user,:foreign_key => "create_user_id",:class_name => "User"
+  belongs_to :order
+  belongs_to :mini_client
+
+  belongs_to :contact_person,:foreign_key => "contact_person_id",:class_name=>"ContactPerson"
+  belongs_to :contact_way,:foreign_key => "contact_way_id",:class_name => "Category"
+
+  CONTACT_RESULT = {0=>"无效的联系",1=>"有效的联系",2=>'正常服务维护'}
+
+  validates_presence_of :content,:if=>Proc.new{|s|s.contact_result_id == 1}
+  validates_presence_of :contact_result_id
+
+  def order_number
+    self.order.number rescue "-"
+  end
+
+  def contact_result
+    CONTACT_RESULT[self.contact_result_id] rescue "-"
+  end
+
+  def contact_result_text
+    self.contact_result_id == 1 || self.contact_result_id == 2 ? self.contact_result + "；" + self.content : self.contact_result + "；" + self.invalid_contact_description rescue "-"
+  end
+
+
+end

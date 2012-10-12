@@ -1,0 +1,24 @@
+<td><%= step.name %></td>
+<td><%= step.develop_status_text %></td>
+<td><%= step.user_name %></td>
+<td><%= step.request_date %></td>
+<td><%= step.complete_date || step.develop_status_text %></td>
+<td><%= step.standard_period %>天</td>
+<td><%= order.number %></td>
+<td><%= order.client_name %></td>
+<td><%= order.order_item.product_name %></td>
+<td><%=truncate order.description,:length=>20 %></td>
+<td><%= order.contract_amount %></td>
+<td>
+  <% case step.develop_status
+       when 0,4
+  %>
+      <%= link_to_custom "提交审核",{:controller=>"order_develop_steps",:action=>"complete",:order_id=>order,:develop_step_id=>step},{:remote=>true,:confirm=>"确认？",:class=>"complete"} %>
+      <%= link_to_custom "延期申请",{:controller=>"order_develop_steps",:action=>"apply_delay_complete",:order_id=>order,:develop_step_id=>step},{:remote=>true,:class=>"apply_delay_complete"} %>
+  <% when 1 %>
+      <%= link_to_custom "通过",{:controller=>"order_develop_steps",:action=>"check",:order_id=>order,:develop_step_id=>step,:result=>true},{:confirm=>"确认通过？",:class=>"check"} %>
+      <%= link_to_custom "驳回",{:controller=>"order_develop_steps",:action=>"check",:order_id=>order,:develop_step_id=>step,:result=>false},{:confirm=>"确认驳回？",:class=>"check"} %>
+  <% when 3 %>
+      <%= link_to_custom "查看",{:controller=>"order_develop_steps",:action=>"delay_check",:order_id=>order,:develop_step_id=>step},{:remote=>true,:class=>"delay_check"} %>
+  <% end %>
+</td>

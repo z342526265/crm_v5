@@ -1,0 +1,8 @@
+
+
+<h1>新建公海</h1>
+<%= form_for(@public_store,:url=>{:action=>"create",:controller => "public_stores"}) do |f| %>
+    <%= render :partial =>  'form',:locals=>{:f=>f} %>
+<% end %>
+
+<%= link_to_custom '返回', :controller=>"public_stores",:action=>"index" %>

@@ -1,0 +1,78 @@
+共有<font color="#a52a2a">&nbsp;<%= @mini_clients_count %>&nbsp;</font> 条记录，分为 <font color="#a52a2a">&nbsp;<%= pages_count(@mini_clients_count,@every_page_count) %>&nbsp;</font>页显示，目前显示第<font color="#a52a2a">&nbsp;<%= params[:page] || 1 %>&nbsp;</font>页
+<table width="100%"  class="kehuliebiaoys">
+
+  <tr>
+    <th>全选<br /><input type="checkbox" name="chk_all" id="chk_all" /></th>
+    <th>名称</th>
+    <th>保护状态</th>
+    <th>地址</th>
+    <th>业务员</th>
+    <th>客服</th>
+    <th>类别</th>
+    <th>最近一次联系记录</th>
+    <th colspan="4">操作</th>
+  </tr>
+  <%#= form_tag "/clients/multi_process?cate_id=#{@current_category.id}" do %>
+  <% @mini_clients.each do |client| %>
+      <tr id='<%= "client_tr"+client.id.to_s %>'>
+        <td><%= check_box_tag "client_ids[]", client.id %><%= client.number %></td>
+        <% tab_name = (client.name.gsub(@shield_fields_regular,"")[0,6]) rescue "-" %>
+        <td><a href="#" name="<%= client.id %>" onclick="showTab(this,'/mini_clients/ajax_show?id=<%= client.id %>','<%= tab_name %>');return false;"><%= tab_name %></a> </td>
+        <!--<td><%#= link_to_custom client.name,{:controller=>"mini_clients",:action=>"ajax_show",:id=>client},:onclick=>"showTab(this,'/mini_clients/ajax_show?id=#{client.id}','#{tab_name}');return false;",:remote=>true,:class=>"show_class"+client.id.to_s %></td>-->
+        <td><%= client.protect_status_text %>[<%= client.remaining_protect_time %>]</td>
+        <td><%=truncate client.address,:length=>20 %></td>
+        <td><%= client.user_name %></td>
+        <td><%= client.serve_user1_name %></td>
+        <td><%= client.client.grade_text rescue "-" %></td>
+        <% contact_record = client.contact_records.first %>
+        <td><%= truncate((contact_record.present? ? contact_record.contact_result_text : "不存在联系记录"),:length=>36) %></td>
+
+        <td id=<%= client.id.to_s+"2" %>>
+          <%= link_to_custom "退回公海",{:controller=>"mini_clients",:action=>"remove_to_public_personal_store",:id=>client},
+                             :remote=>true,:class=>"move_to_public_store" %>
+        </td>
+        <td id=<%= client.id.to_s+"3" %>>
+          <%= link_to_custom "保护",{:controller=>"mini_clients",:action=>"add_to_had_intention_personal_store",:id=>client},
+                             :remote=>true,:class=>"add_to_had_intention_personal_store" if client.status_num != 3 %></td>
+        <td><%= link_to_custom "签单",:controller=>"orders",:action=>"create",:mini_client_id=>client.id %></td>
+      </tr>
+  <% end %>
+
+  <%# end %>
+</table>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+
+        $(".move_to_public_store")
+                .bind("ajax:beforeSend", function(evt, xhr, settings){
+                    if(!confirm("退回公海？")){
+                        return false;
+                    }else{
+                        createPrintDIV();
+                    }
+                })
+                .bind("ajax:success", function(evt, data, status, xhr){
+                    alert("成功退回公海！");
+                    $("#ajax_index_table_v2").html(data);
+                    $("#sk").remove();
+                })
+        $(".add_to_had_intention_personal_store")
+                .bind("ajax:beforeSend", function(evt, xhr, settings){
+                    if(!confirm("加入我的保护库？")){
+                        return false;
+                    }else{
+                        createPrintDIV();
+                    };
+                })
+                .bind("ajax:success", function(evt, data, status, xhr){
+                    if(data=="failed"){
+                        alert("您可保护的客户数量已经达到上限，如需继续增加保护客户，请联系管理员！")
+                    }else{
+                        alert("成功加入保护库！")
+                        $("#ajax_index_table_v2").html(data);
+                        $("#sk").remove();
+                    }
+                })
+    })
+</script>

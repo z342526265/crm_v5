@@ -1,0 +1,20 @@
+<% # encoding: utf-8 %>
+<div id="ajax_index_table_v3">
+      <%= render :partial => "/mini_clients/ajax_index/ajax_index_table_v4" %>
+</div>
+<!--<div id="smart-paginator" style="float:right;" ></div>-->
+<!--<br />-->
+
+
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#chk_all").click(function(){
+            var v = false
+            if($(this).attr("checked")){
+                v = true
+            }
+            $("input[name='client_ids[]']").attr("checked",v);
+        });
+    });
+</script>

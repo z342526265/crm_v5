@@ -1,0 +1,33 @@
+# encoding: utf-8
+class ContactRecord < ActiveRecord::Base
+  # attr_accessible :title, :body
+  include SetCreatedUser
+  include CustomAssociationMethod
+
+  belongs_to :contact_way,:foreign_key => "contact_way_id",:class_name => "Category",:conditions => ["cate='contact_way'"]
+
+  #belongs_to :created_user,:foreign_key => "created_user_id",:class_name => "User"
+
+  belongs_to :contact_person,:foreign_key => "contact_person_id",:class_name=>"ContactPerson"
+  belongs_to :mini_client,:counter_cache => true
+
+  CONTACT_RESULT = {0=>"无效的联系",1=>"有效的联系"}
+  def contact_result
+    CONTACT_RESULT[self.contact_result_id]
+  end
+
+  def contact_result_text
+    "#{self.created_at.strftime('%y-%m-%d %H:%M:%S')} 1.#{self.contact_way_name};2.#{self.description} "
+    #3.介绍的产品：#{self.introduce_product}\n 4.介绍的服务：#{self.introduce_server}\n
+    #5.兴趣点：#{self.interest_point}\n 4.异议点：#{self.dissent_point}\n
+  end
+
+
+  #before_create :set_data
+
+  private
+  #def set_data
+  #  self.created_user = User.current
+  #end
+
+end

@@ -1,0 +1,19 @@
+
+<td><%= select_tag "order_items[product_id][]",options_from_collection_for_select(@products,"id","name"),:class=>"liiii" %></td>
+<td><%= text_field_tag "order_items[contract_amount][]" ,"",:class=>"liiii" %></td>
+<td><%= text_field_tag "order_items[received_amount][]","",:class=>"liiii" %></td>
+<td><%= text_field_tag "order_items[serve_start_at][]",Date.today,:class=>"time liiii" %></td>
+<td><%= text_field_tag "order_items[serve_end_at][]",Date.today + 1.years,:class=>"time liiii" %></td>
+<td><%= link_to_custom "删除","#",:remote=>true,:class=>"ajax_destroy_order_item_tr" %></td>
+
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        // 输入框日期弹出框
+        $(".time").calendar();
+
+        //删除订单详情的tr
+        $(".ajax_destroy_order_item_tr").click(function(event){
+            $(this).parent().parent().remove();
+        })
+    })
+</script>

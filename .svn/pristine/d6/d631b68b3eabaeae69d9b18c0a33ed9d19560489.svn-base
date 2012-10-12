@@ -1,0 +1,18 @@
+<% # encoding: utf-8 %>
+<div id="ajax_index_table_v2">
+  <%= render :partial => "/mini_clients/ajax_index/ajax_index_table_v2" %>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#chk_all").click(function(){
+            var v = false
+            if($(this).attr("checked")){
+                v = true
+            }
+            $("input[name='client_ids[]']").attr("checked",v);
+        });
+    });
+
+
+</script>

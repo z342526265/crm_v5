@@ -1,0 +1,24 @@
+<% # encoding: utf-8 %>
+<div class="main">
+  <div class="tabBar">
+    <ul id="tab">
+    </ul>
+  </div>
+  <div class="window" id="win">
+  </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function(){
+        <% if action_name == "my_follow_clients" %>
+        inity("/mini_clients/ajax_index_v2");
+        <% elsif action_name == "my_clients_of_had_orders" %>
+        inity("/mini_clients/ajax_index_v3");
+        <% elsif action_name == "my_serve_clients" %>
+        inity("/mini_clients/ajax_index_v4");
+        <% end %>
+    })
+
+
+
+
+</script>

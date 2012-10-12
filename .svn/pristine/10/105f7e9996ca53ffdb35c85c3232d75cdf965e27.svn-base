@@ -1,0 +1,135 @@
+<%= f.error_messages %>
+<table width="800" border="0" style="line-height: 25px;">
+  <tr>
+    <td><%= f.label :name,"姓名" %></td>
+    <td align="left"><%= f.text_field :name %></td>
+    <td> <%= f.label :nation,"民族" %></td>
+    <td align="left"> <%= f.select :nation,User::NATION %></td>
+  </tr>
+
+  <tr>
+    <td><%= f.label :email,"邮箱" %></td>
+    <td align="left"><%= f.email_field :email %></td>
+    <td><%= f.label :marriage_status,"婚姻状况" %></td>
+    <td align="left"><%= f.select :marriage_status,User::MARRIAGE_STATUS %></td>
+  </tr>
+
+  <tr>
+    <td><%= f.label :department_id,"部门" %></td>
+    <td align="left"><%= f.select :department_id,Department.all.collect{|d|[d.name,d.id]} %></td>
+    <td><%= f.label :last_college ,"毕业院校"%></td>
+    <td align="left"><%= f.text_field :last_college %></td>
+  </tr>
+  <tr>
+    <td><%= f.label :position_id,"岗位" %></td>
+    <td align="left"><%= f.select :position_id,Position.all.collect{|d|[d.name,d.id]} %></td>
+    <td><%= f.label :edu_level,"最高学历" %></td>
+    <td align="left"><%= f.select :edu_level ,User::EDU_LEVEL %></td>
+  </tr>
+
+
+
+  <tr>
+    <td> <%= f.label :roles,"角色" %></td>
+    <td align="left">
+      <table>
+        <tr>
+          <% @roles.each_with_index do |r,i| %>
+              <td>
+
+                <%= check_box_tag "user[role_ids][]", r.id,@user.roles.map(&:id).include?(r.id) %><%= r.name %>
+              </td>
+          <% end %>
+        </tr>
+      </table>
+    </td>
+    <td><%= f.label :identity_card ,"身份证号"%></td>
+    <td align="left"><%= f.text_field :identity_card %></td>
+  </tr>
+
+
+
+  <tr >
+    <td>主管及以上：<input id="manager_departments_check_box" type="checkbox" value="1" onclick="$('#manager_departments').toggle()"></td>
+    <td style="display: none;" id="manager_departments">
+      <%= f.label "manager_department_ids","负责的部门" %>
+      <table>
+        <tr>
+          <% Department.all.each_with_index do |d,i| %>
+              <td>
+                <%= check_box_tag "user[manager_department_ids][]", d.id,@user.manager_departments.map(&:id).include?(d.id) %><%= d.name %>
+              </td>
+          <% end %>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+
+  <tr>
+    <td><%= f.label :person_image,"头像" %></td>
+    <td align="left"><%= image_tag @user.person_image.url(:thumb) if @user.person_image %>
+      <%= f.file_field :person_image %></td>
+    <td><%= f.label :identity_image ,"身份证扫描件"%></td>
+    <td align="left"><%= image_tag @user.identity_image.url(:thumb) if @user.identity_image %>
+      <%= f.file_field :identity_image %></td>
+  </tr>
+  <tr>
+    <td><%= f.label :sex,"性别" %></td>
+    <td align="left"><%= f.select :sex ,User::SEX %></td>
+    <td><%= f.label :current_address,"现住址" %></td>
+    <td align="left"><%= f.text_field :current_address %></td>
+  </tr>
+  <tr>
+    <td><%= f.label :mobile,"手机" %></td>
+    <td align="left"><%= f.text_field :mobile %></td>
+    <td><%= f.label :family_address,"家庭住址" %></td>
+    <td align="left"><%= f.text_field :family_address %></td>
+  </tr>
+  <tr>
+    <td><%= f.label :tel,"办公电话" %></td>
+    <td align="left"><%= f.text_field :tel %></td>
+    <td> <%= f.label :father,"父亲姓名" %></td>
+    <td align="left"><%= f.text_field :father %></td>
+  </tr>
+  <tr>
+    <td><%= f.label :qq ,"办公QQ号码"%></td>
+    <td align="left"><%= f.text_field :qq %></td>
+    <td><%= f.label :father_birth,"父亲生日" %></td>
+    <td align="left"><%= f.text_field :father_birth  %></td>
+  </tr>
+  <tr>
+    <td><%= f.label :enter_date,"入职日期" %></td>
+    <td align="left"><%= f.text_field :enter_date  %></td>
+    <td><%= f.label :father_mobile,"父亲手机" %></td>
+    <td align="left"><%= f.text_field :father_mobile %></td>
+  </tr>
+  <tr>
+    <td><%= f.label :birth ,"出生日期" %></td>
+    <td align="left"><%= f.text_field :birth  %></td>
+    <td> <%= f.label :mother,"母亲姓名" %></td>
+    <td align="left"><%= f.text_field :mother %></td>
+  </tr>
+  <tr>
+    <td><%= f.label :mother_birth,"母亲生日" %></td>
+    <td align="left"><%= f.text_field :mother_birth   %></td>
+    <td><%= f.label :mother_mobile,"母亲手机" %></td>
+    <td align="left"><%= f.text_field :mother_mobile %></td>
+  </tr>
+  <tr>
+    <td> <%= f.label :comment,"备注" %></td>
+    <td align="left"><%= f.text_area :comment,:cols=>10,:rows=>2 %></td>
+    <td>是否熟练员工</td>
+    <td><%= f.check_box :is_expert %></td>
+  </tr>
+</table>
+
+
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+
+        // 输入框日期弹出框
+        $("#user_enter_date,#user_birth,#user_father_birth,#user_mother_birth").calendar();
+    });
+</script>
+

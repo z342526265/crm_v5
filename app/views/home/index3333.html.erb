@@ -1,0 +1,107 @@
+<% # encoding: utf-8 %>
+
+
+
+<p>我的联系提醒</p>
+<table>
+  <tr>
+    <th>提醒时间</th>
+    <th>内容</th>
+    <th>是否执行</th>
+    <th></th>
+  </tr>
+  <% @contact_reminds.each do |reminding| %>
+      <tr>
+        <td><%= reminding.remind_datetime %></td>
+        <td><%= reminding.remind_content %></td>
+        <td><%= reminding.is_reminded ? "是" : "否" %></td>
+        <td><%= link_to_custom "添加联系记录",:controller => "contact_records",:action=>"new",:reminding_id=>reminding,:client_id=>reminding.client,:cate_id=>@current_user.the_category_by_client(reminding.client) unless reminding.is_reminded? %></td>
+      </tr>
+  <% end %>
+</table>
+
+<% if @check_items.present? %>
+
+    <p>待审核事项</p>
+    <table>
+      <tr>
+        <th>待审核对象</th>
+        <th>描述</th>
+        <th></th>
+      </tr>
+      <% @check_items.each do |resource_type,check_items| %>
+          <% check_items.each do |check_item| %>
+              <tr id="check_item_tr_<%= check_item.id %>">
+                <td><%= check_item.name %></td>
+                <td><%= check_item.description %></td>
+                <td>
+                  <% if ["Order","OrderItem","PaidItem"].include? resource_type %>
+                      <%= link_to_custom "查看",{:controller => "home",:action=>"order_show",:id=>check_item},:remote=>true,:class=>"order_show" %>|
+                      <%= link_to_custom "审核",{:controller => "orders",:action=>"check",:id=>check_item,:cate=>"home"},:remote=>true,:class=>"order_check" %>
+                  <% else %>
+                      <%= link_to_custom "通过",{:controller => "clients",:action=>"check",:result=>true,:id=>check_item},:method=>"post" %>|
+                      <%= link_to_custom "驳回",{:controller => "clients",:action=>"check",:result=>false,:id=>check_item},:method=>"post" %>
+                  <% end %>
+                </td>
+              </tr>
+          <% end %>
+      <% end %>
+    </table>
+
+<% end %>
+
+<% mini_client_id = "" %>
+<!-- 弹出层 -->
+<div id='<%="order_show_pop#{mini_client_id}"%>' style="background-color:#CCFF88; border: solid 1px #666666; position: absolute; display:none;
+        width:600px; height:auto; left: 30%; top:25%;">
+  <table width="100%">
+    <tr>
+      <td align="center" style="font-size: 16px; line-height: 26px;">
+        <strong>订单管理</strong>
+      </td>
+      <td align="right"><a id='<%= "order_show_pop_close#{mini_client_id}"%>'><img src=<%= asset_path('new_css_v1/3-3main.gif') %> /></a></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <div id='<%= "order_show_div#{mini_client_id}" %>' style="text-align: center; background: #a6ff76" >
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+
+
+<script>
+  $(document).ready(function(){
+
+      var client_id = '<%= mini_client_id %>'
+
+      //动画速度
+      var speed = 5;
+
+      //弹出框距离顶部的距离
+//      $("#order_show_pop"+client_id).css({'top':"350px"})
+
+      $('.order_show')
+              .bind("ajax:success", function(evt, data, status, xhr){
+                  $("#order_show_div"+client_id).html(data);
+                  evt.preventDefault();
+                  $("#order_show_pop"+client_id).toggle(speed);
+              })
+
+      $('.order_check')
+              .bind("ajax:success", function(evt, data, status, xhr){
+                  $("#order_show_div"+client_id).html(data);
+                  $("#order_show_pop"+client_id).toggle(speed);
+                  evt.preventDefault();
+              })
+
+      //单击空白区域隐藏弹出层
+      $("#order_show_pop_close"+client_id).click(function(event) {
+          $("#order_show_div"+client_id).html("加载中......");
+          $("#order_show_pop"+client_id).hide(speed);
+      });
+
+  })
+</script>

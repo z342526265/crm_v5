@@ -1,0 +1,66 @@
+# encoding: utf-8
+require "string"
+require "array"
+class ApplicationController < ActionController::Base
+  protect_from_forgery
+
+  before_filter :check_permission,:set_basic_data
+
+
+  def check
+    @check_item = CheckItem.find(params[:id])
+    if params[:result] == "true"
+      @check_item.check_resource.update_attributes(@check_item.attrs)
+      @check_item.update_attributes(:checked_user_id=>@current_user.id,:is_checked=>true,:is_approval=>true)
+    elsif params[:result] == "false"
+      @check_item.update_attributes(:checked_user_id=>@current_user.id,:is_checked=>true,:is_approval=>false)
+    end
+    redirect_to :back
+    flash[:notice] = "审核完成"
+  end
+
+  private
+
+  #设置权限
+  def check_permission
+    @current_user = User.find(session[:user_id]) if session[:user_id]
+    User.current = @current_user
+    if @current_user.present?
+      @current_c_action = "#{controller_name}-#{action_name}"
+      unless @current_user.can_visit?(@current_c_action)
+        redirect_to :controller=>"admin",:action=>"permission_error"
+        flash[:alert] = "您没有权限访问！"
+      end
+    else
+      redirect_to :controller=>"admin",:action=>"login"
+      flash[:alert] = "请首先登陆！"
+    end
+  end
+
+  #设置基础数据
+  def set_basic_data
+    if @current_user
+
+
+
+      #获取部门的公海
+      @current_public_stores = @current_user.public_stores
+      @every_page_count = 50
+      #  #把给用户指定的公海加入当前公海数组
+      #  @current_public_categories = @current_public_categories + @current_user.public_stores
+      #  #去掉重复
+      #  @current_public_categories.uniq!
+      #  @current_personal_categories = Category.find_all_by_user(@current_user).by_cate("personal_store")
+      #  @current_roles = @current_user.roles.select{|role|role.permission.include?(@current_c_action)}
+      #  @reminding_count = @current_user.remindings.where(["is_reminded=? and remind_datetime < ?",false,DateTime.current]).count
+      #@current_page = 10
+      #@public_stores = Category.by_cate("public_store")
+    end
+  end
+
+
+
+end
+
+
+

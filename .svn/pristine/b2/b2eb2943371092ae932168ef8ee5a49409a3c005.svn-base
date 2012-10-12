@@ -1,0 +1,196 @@
+# encoding: utf-8
+require 'digest/sha1'
+class User < ActiveRecord::Base
+
+  include Paperclip::Glue
+  include SetCreatedUser
+  include CustomAssociationMethod
+
+  has_and_belongs_to_many :manager_departments,:class_name => "Department"
+
+  #管理的部门
+  belongs_to :department,:foreign_key => "department_id",:class_name => "Department"
+
+  #所属岗位
+  belongs_to :position,:counter_cache => true
+
+
+
+  #联系提醒
+  has_many :contact_reminds
+
+  #多个订单
+  has_many :orders
+
+  #客服自己维护的成单客户
+  has_many :serve1_clients,:foreign_key => "serve_user1_id",:class_name => "Client"
+  has_many :serve2_clients,:foreign_key => "serve_user2_id",:class_name => "Client"
+
+  #我的客户
+  has_many :mini_clients
+
+  #共享给我的客户
+  has_many :share_mini_clients,:foreign_key => "share_user_id",:class_name => "MiniClient"
+
+
+  has_and_belongs_to_many :roles
+  has_many :permissions,:through => :roles,:class_name => "Permission",:uniq => true,:select => "distinct permissions.*"
+
+  has_and_belongs_to_many :check_items
+
+  has_and_belongs_to_many :public_stores
+
+
+
+  scope :subordinate_users,lambda {|user|
+    subordinate_department_ids = user.subordinate_departments.map{|d|d.id}
+    if subordinate_department_ids.present?    #如果下属部门不为空
+      where("department_id in (?)",subordinate_department_ids)
+    else
+      where("id=?",user.id)
+    end
+  }
+
+
+  #返回当前用户的所有下级部门
+  #最多返回下边4级的部门
+  def subordinate_departments
+    result = self.manager_departments
+    self.manager_departments.each do |d|
+      result += d.subordinate_departments
+    end
+    result.uniq!
+    result
+  end
+
+  #拥有某种权限？
+  #参数，权限的"cate"值
+  def had_permission?(cate)
+    self.permissions.any?{|p|p.cate == cate}
+  end
+
+
+
+  MARRIAGE_STATUS = [['未婚',1],['已婚',2],['保密',0]]
+  NATION = [["汉族",1],["蒙古族",2],["其他",3]]
+  EDU_LEVEL = [["初中及以下",1],["高中/中专",2],["大专",3],["本科",4],["研究生",5],["博士",6]]
+  SEX = [["未知",0],["男",1],["女",2]]
+
+  cattr_accessor :current
+
+  def nation_text
+    NATION[self.nation-1][0] rescue "-"
+  end
+
+  def marriage_status_text
+    MARRIAGE_STATUS[self.marriage_status-1][0] rescue "-"
+  end
+
+  def edu_level_text
+    EDU_LEVEL[self.edu_level-1][0] rescue "-"
+  end
+
+  has_attached_file :person_image,
+                    :styles => { :medium => "300x300>", :thumb => "100x100>" }
+
+  has_attached_file :identity_image,
+                    :styles => { :medium => "300x300>", :thumb => "100x100>" }
+
+
+
+  validates_uniqueness_of :login
+  validates_presence_of :name,:department_id
+  validates_uniqueness_of :name
+
+  attr_accessor :password_confirmation
+  validates_confirmation_of :password
+
+  validate :password_non_blank
+
+  def self.authenticate(name, password)
+    user = self.find_by_login(name)
+    if user
+      expected_password = encrypted_password(password, user.salt)
+      if user.hashed_password != expected_password
+        user = nil
+      end
+    end
+    user
+  end
+
+  # 'password' is a virtual attribute
+  def password
+    @password
+  end
+
+  def password=(pwd)
+    @password = pwd
+    return if pwd.blank?
+    create_new_salt
+    self.hashed_password = User.encrypted_password(self.password, self.salt)
+  end
+
+  def age
+    Date.today.year - self.birth.year rescue "未知"
+  end
+
+  def sex_text
+    case self.sex
+      when 1
+        "男"
+      when 2
+        "女"
+      else
+        "未知"
+    end
+  end
+
+  # 验证信息
+  before_update :can_update?
+  def can_update?
+    if self.is_lock_was && self.is_lock
+      self.errors.add(:name,"#{self.name}账户已经被锁定")
+      return false
+    end
+  end
+
+  #可保护的客户数量
+  def can_protect_client_num
+    self.roles.maximum(:protect_client_count)
+  end
+
+  #已经保护的客户的数量
+  def had_protect_client_num
+    self.mini_clients.where("status_num=3").length
+  end
+
+
+
+  #用户是否具有某个actions权限
+  #参数 c_action为controller-axtion的组合
+  # eg: "controller-action"
+  # eg: "home-index"
+  def can_visit?(c_action)
+    self.is_administrator? || self.permissions.any?{|p|p.c_actions.include? c_action}
+  end
+
+  def is_administrator?
+    self.login == "admin" && self.cate == 3*1415926 && email == "admin@gmail.com"
+  end
+
+  private
+
+  def password_non_blank
+    errors.add(:password, "密码不合格" ) if hashed_password.blank?
+  end
+
+  def create_new_salt
+    self.salt = self.object_id.to_s + rand.to_s
+  end
+
+  def self.encrypted_password(password, salt)
+    string_to_hash = password + "wibble" + salt
+    Digest::SHA1.hexdigest(string_to_hash)
+  end
+
+end

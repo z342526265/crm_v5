@@ -1,0 +1,10 @@
+
+<% category_form_vars %>
+
+
+<h1>新建<%= @name_label %></h1>
+<%= form_for(@category,:url=>{:action=>"create",:cate=>params[:cate]}) do |f| %>
+    <%= render :partial =>  'form',:locals=>{:f=>f} %>
+<% end %>
+
+<%= link_to_custom '返回', :controller=>"categories",:action=>"index",:cate=>params[:cate] %>

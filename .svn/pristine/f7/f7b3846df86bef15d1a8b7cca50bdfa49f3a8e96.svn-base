@@ -1,0 +1,74 @@
+<p><h2>资产列表</h2></p>
+<div>
+  <%= form_for @search, :url => {:controller=>"assets",:action=>"index"},:html => {:method => :get} do |f| %>
+      <%= f.label :name_or_number_like,'名称或编号' %>
+      <%= f.text_field :name_or_number_like,:class=>"user_select" %>&nbsp;&nbsp;&nbsp;
+      <%= f.label :asset_cate_id_eq,'类型' %>
+      <%= f.select :asset_cate_id_eq,Category.find_all_by_cate("asset_cate").map{|u|[u.name,u.id]},{:include_blank=>true},{:class=>"user_select"} %>&nbsp;&nbsp;&nbsp;
+      <%= f.label :user_id_eq,'使用人' %>
+      <%= f.select :user_id_eq,User.all.map{|u|[u.name,u.id]},{:include_blank=>true},{:class=>"user_select"} %>&nbsp;&nbsp;&nbsp;
+      <%= f.label :supplier_id_eq,'供应商' %>
+      <%= f.select :supplier_id_eq,Supplier.all.map{|u|[u.name,u.id]},{:include_blank=>true},{:class=>"user_select"} %>&nbsp;&nbsp;&nbsp;
+      <%= f.submit "提交" %>
+  <% end %>
+</div>
+<table>
+
+  <tr>
+    <td>资产编号</td>
+    <td>资产名称</td>
+    <td>使用人</td>
+    <td>品牌</td>
+    <td>规格</td>
+    <td>供应商</td>
+    <td>采购日期</td>
+    <td>采购价格</td>
+    <td>采购人</td>
+    <td>采购方式</td>
+    <td>备注</td>
+    <td colspan="2">操作</td>
+  </tr>
+  <% @assets.each do |asset| %>
+      <tr>
+        <td><%= asset.number %></td>
+        <td><%= asset.name %></td>
+        <td><%= asset.user_name %></td>
+        <td><%= asset.brand %></td>
+        <td><%= asset.standard %></td>
+        <td><%= asset.supplier_name %></td>
+        <td><%= asset.purchase_date %></td>
+        <td><%= asset.purchase_price %></td>
+        <td><%= asset.purchase_user_name %></td>
+        <td><%= asset.purchase_way_name %></td>
+        <td><%= asset.description %></td>
+        <td>
+          <%= link_to_custom "修改",{:controller=>"assets",:action=>"update",:id=>asset} %>
+          <%= link_to_custom "删除",{:controller=>"assets",:action=>"destroy",:id=>asset},:method=>:delete,:confirm=>"确认删除？" %>
+        </td>
+        <td>
+          <%= form_for asset,:url=>{:controller=>"assets",:action=>"update",:id=>asset},:html => {:remote=>true,:class=>"asset_form_user"} do |f| %>
+              分配给：<%= f.select "user_id",User.all.map{|u|[u.name,u.id]},{:include_blank=>true},{:class=>"user_select"} %>
+              <%= f.submit "提交" %>
+          <% end %>
+        </td>
+      </tr>
+  <% end %>
+</table>
+
+<div id="custom_popup"></div>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".asset_form_user")
+                .bind("ajax:beforeSend", function(evt, xhr, settings){
+                    createPrintDIV();
+                })
+                .bind("ajax:success",function(evt,data){
+                    var user_name = $(this).find("select").eq(0).children(":selected").text();
+//                        var txt = $(this).parent("td").prevAll("td").eq(-3).text();
+                    $(this).parent("td").prevAll("td").eq(-3).text(user_name);
+                    $("#sk").remove();
+                })
+    })
+
+</script>

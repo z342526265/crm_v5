@@ -1,0 +1,24 @@
+<p>审核</p>
+<%= form_for @check_item,:url=>{:controller=>"orders",:action=>"check",:id=>@check_item},:html=>{:remote=>true} do |f| %>
+    <%= f.label "check_info","审核意见" %>
+    <%= f.text_area "check_info",:cols=>30,:rows=>3 %><br/>
+    <%= f.submit "通过" %>
+    <%= f.submit "驳回" %>
+<% end %>
+
+<script>
+    $(document).ready(function(){
+        var check_item_id = '<%= @check_item.id %>'
+        var client_id = '<%= @order.mini_client.id %>'
+        $('#edit_check_item_'+check_item_id)
+                .bind("ajax:beforeSend",function(evt,xhr,settings){
+                    $("#order_show_pop"+client_id).hide();
+                    createPrintDIV();
+                })
+                .bind("ajax:success", function(evt, data, status, xhr){
+                    alert("审核完成！");
+                    $("#"+'<%= "show-tab-4"%>'+client_id).html(data);
+                    $("#sk").remove();
+                })
+    })
+</script>

@@ -1,0 +1,61 @@
+共有<font color="#a52a2a">&nbsp;<%= @mini_clients_count %>&nbsp;</font> 条记录，分为 <font color="#a52a2a">&nbsp;<%= pages_count(@mini_clients_count,@every_page_count) %>&nbsp;</font>页显示，目前显示第<font color="#a52a2a">&nbsp;<%= params[:page] || 1 %>&nbsp;</font>页
+<table width="100%"  class="kehuliebiaoys">
+
+  <tr>
+    <th>全选<br /><input type="checkbox" name="chk_all" id="chk_all" /></th>
+    <th>名称</th>
+    <th>类别</th>
+    <th>到期时间</th>
+    <th>联系</th>
+    <th>维护</th>
+    <th>拜访</th>
+    <th>最近服务时间</th>
+    <th>最近一次服务内容</th>
+    <th>客服1</th>
+    <th colspan="4">操作</th>
+  </tr>
+  <%#= form_tag "/clients/multi_process?cate_id=#{@current_category.id}" do %>
+
+  <% @mini_clients.each do |client| %>
+      <tr id='<%= "client_tr"+client.id.to_s %>'>
+        <%= render :partial=>"/mini_clients/ajax_index/ajax_index_table_v4_tr",:locals=>{:client=>client} %>
+      </tr>
+  <% end %>
+</table>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".distribute_client_to_server")
+                .live("ajax:beforeSend", function(evt, xhr, settings){
+                    if(!confirm("确定？")){
+                        return false;
+                    }else{
+                        createPrintDIV();
+                    }
+                })
+                .live("ajax:success", function(evt, data,status, xhr){
+                    if(data=="failed"){
+                        alert("未分配成功！")
+                    }else{
+//                        $("#ajax_index_table_v4").html(data);
+                        $(this).parent("td").parent("tr").html(data);
+                        alert("分配成功！");
+                    }
+                    $("#sk").remove();
+                })
+        $(".shixiao")
+                .live("ajax:beforeSend", function(evt, xhr, settings){
+                    createPrintDIV();
+                })
+                .live("ajax:success", function(evt, data,status, xhr){
+                    if(data=="failed"){
+                        alert("未成功设置失效！")
+                    }else{
+//                        $("#ajax_index_table_v4").html(data);
+                        $(this).parent("td").parent("tr").html(data);
+                        alert("已成功设置失效！");
+                    }
+                    $("#sk").remove();
+                })
+    })
+</script>

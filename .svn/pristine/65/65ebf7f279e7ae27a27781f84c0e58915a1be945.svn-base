@@ -1,0 +1,79 @@
+# encoding: utf-8
+class Order < ActiveRecord::Base
+  # attr_accessible :title, :body
+
+  include SetCreatedUser
+  include CustomAssociationMethod
+
+  #假删除
+  acts_as_paranoid
+
+  #belongs_to :created_user,:foreign_key => "created_user_id",:class_name => "User"
+  belongs_to :mini_client,:counter_cache => true
+  belongs_to :client,:counter_cache => true
+  belongs_to :contact_person,:foreign_key => "contact_person_id",:class_name=>"ContactPerson"
+  has_many :order_items,:dependent => :destroy
+  has_many :paid_items
+
+  has_many :check_items,:as=>:check_resource
+
+
+  #validates_presence_of :product_id
+
+  #审核状态
+  CHECK_STATUS = {0=>"正常状态",1=>'新建订单，等待审核',2=>"修改订单，等待审核",3=>"删除订单，等待审核！"}
+
+  #attr_reader :owe_amount
+  #def owe_amount
+  #  self.total_amount - self.received_amount rescue "异常"
+  #end
+
+  def check_status_text
+    CHECK_STATUS[self.check_status] rescue "-"
+  end
+
+  def serve_status
+    self.order_items.any?{|item|item.serve_end_at > Date.today}
+  end
+
+  def serve_status_text
+    self.serve_status ? "正常服务中..." : "所有订单的服务已到期！"
+  end
+
+
+  #def total_amount
+  #  self.order_items.sum{|item|item.total_price}
+  #end
+
+
+  #def received_amount
+  #  self.paid_items.sum{|item|item.paid_amount}
+  #end
+
+  #def total_paid_amount
+  #
+  #end
+  #
+  #def total_owe_amount
+  #
+  #end
+
+
+
+  before_create :set_data1
+  #after_destroy :set_client_status
+  private
+
+  def set_data1
+    count_num = Order.with_deleted.count + 1
+    num = 6-count_num.to_s.length
+    self.number = "0"*num + count_num.to_s
+    #self.created_user = User.current
+  end
+
+  #def set_client_status
+  #  self.client.update_attribute(:status_num,2)
+  #end
+
+
+end

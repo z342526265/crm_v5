@@ -1,0 +1,44 @@
+<% # encoding: utf-8 %>
+<p><h2>信息列表</h2></p>
+<table class="ygxinxilb2">
+  <tr>
+    <th>姓名</th>
+    <th>头像</th>
+    <th>性别</th>
+    <th>年龄</th>
+    <th>所属部门</th>
+    <th>职位</th>
+    <th>角色</th>
+    <th>手机</th>
+    <th>邮箱</th>
+    <th>QQ</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+  <% @users.each do |user| %>
+      <tr>
+        <td><%= user.name %></td>
+        <td><%= image_tag user.person_image.url(:thumb) %></td>
+        <td><%= user.sex_text %></td>
+        <td><%= user.age %></td>
+        <td><%= user.department_name %></td>
+        <td><%= user.position_name %></td>
+        <td><%= user.roles_names %></td>
+        <td><%= user.mobile %></td>
+        <td><%= user.email %></td>
+        <td><%= user.qq %></td>
+        <td><%= link_to_custom '详情', {:controller=>"users",:action=>"show",:id=>user} %></td>
+        <% unless user.is_lock %>
+            <td><%= link_to_custom '编辑', {:controller=>"users",:action=>"edit",:id=>user} %></td>
+            <td><%= link_to_custom '锁定', {:controller=>"users",:action=>"lock",:id=>user},:confirm=> '确认锁定该账户?', :method=>:delete %></td>
+        <% else %>
+            <td><%= link_to_custom '解锁', {:controller=>"users",:action=>"unlock",:id=>user},:confirm=> '确认解锁该账户?', :method=>:put %></td>
+        <% end %>
+      </tr>
+  <% end %>
+</table>
+<%= paginate @users %>
+<br />
+<%= link_to_custom('新增员工', :controller=>"users",:action=>"new") %>

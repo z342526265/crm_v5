@@ -1,0 +1,461 @@
+# encoding: UTF-8
+# This file is auto-generated from the current state of the database. Instead
+# of editing this file, please use the migrations feature of Active Record to
+# incrementally modify your database, and then regenerate this schema definition.
+#
+# Note that this schema.rb definition is the authoritative source for your
+# database schema. If you need to create the application database on another
+# system, you should be using db:schema:load, not running all the migrations
+# from scratch. The latter is a flawed and unsustainable approach (the more migrations
+# you'll amass, the slower it'll run and the greater likelihood for issues).
+#
+# It's strongly recommended to check this file into your version control system.
+
+ActiveRecord::Schema.define(:version => 20120626232010) do
+
+  create_table "categories", :force => true do |t|
+    t.string   "name"
+    t.string   "cate"
+    t.integer  "level",           :default => 0
+    t.boolean  "need_verify",     :default => false
+    t.text     "description"
+    t.integer  "num"
+    t.integer  "department_id"
+    t.integer  "created_user_id"
+    t.datetime "created_at",                         :null => false
+    t.datetime "updated_at",                         :null => false
+  end
+
+  add_index "categories", ["cate"], :name => "index_categories_on_cate"
+  add_index "categories", ["level"], :name => "index_categories_on_level"
+  add_index "categories", ["name"], :name => "index_categories_on_name"
+  add_index "categories", ["need_verify"], :name => "index_categories_on_need_verify"
+
+  create_table "check_items", :force => true do |t|
+    t.integer  "check_resource_id"
+    t.string   "check_resource_type"
+    t.string   "name"
+    t.text     "description"
+    t.text     "attrs"
+    t.integer  "checked_user_id"
+    t.boolean  "is_checked",          :default => false
+    t.boolean  "is_approval",         :default => false
+    t.integer  "cate",                :default => 1
+    t.integer  "created_user_id"
+    t.datetime "created_at",                             :null => false
+    t.datetime "updated_at",                             :null => false
+  end
+
+  add_index "check_items", ["cate"], :name => "index_check_items_on_cate"
+  add_index "check_items", ["check_resource_id"], :name => "index_check_items_on_check_resource_id"
+  add_index "check_items", ["check_resource_type"], :name => "index_check_items_on_check_resource_type"
+  add_index "check_items", ["checked_user_id"], :name => "index_check_items_on_checked_user_id"
+  add_index "check_items", ["created_user_id"], :name => "index_check_items_on_created_user_id"
+  add_index "check_items", ["is_approval"], :name => "index_check_items_on_is_approval"
+  add_index "check_items", ["is_checked"], :name => "index_check_items_on_is_checked"
+
+  create_table "check_items_users", :id => false, :force => true do |t|
+    t.integer "check_item_id"
+    t.integer "user_id"
+  end
+
+  add_index "check_items_users", ["check_item_id"], :name => "index_check_items_users_on_check_item_id"
+  add_index "check_items_users", ["user_id"], :name => "index_check_items_users_on_user_id"
+
+  create_table "clients", :force => true do |t|
+    t.string   "name"
+    t.integer  "nature_id"
+    t.integer  "origin_id"
+    t.integer  "grade_id"
+    t.string   "web_url"
+    t.string   "contact"
+    t.string   "mobile"
+    t.string   "tel"
+    t.string   "fax"
+    t.string   "qq"
+    t.string   "email"
+    t.string   "province"
+    t.string   "city"
+    t.string   "district"
+    t.string   "address"
+    t.string   "trade"
+    t.string   "legal_person"
+    t.integer  "fund"
+    t.date     "found_date"
+    t.string   "main_business"
+    t.string   "main_client_base"
+    t.string   "business_rang"
+    t.string   "business_area"
+    t.text     "description"
+    t.string   "net_spread"
+    t.boolean  "had_order"
+    t.integer  "status_num",       :default => 0
+    t.string   "number"
+    t.integer  "orders_count"
+    t.integer  "created_user_id",                 :null => false
+    t.datetime "created_at",                      :null => false
+    t.datetime "updated_at",                      :null => false
+  end
+
+  add_index "clients", ["grade_id"], :name => "index_clients_on_grade_id"
+  add_index "clients", ["mobile"], :name => "index_clients_on_mobile"
+  add_index "clients", ["name"], :name => "index_clients_on_name"
+  add_index "clients", ["nature_id"], :name => "index_clients_on_nature_id"
+  add_index "clients", ["number"], :name => "index_clients_on_number"
+  add_index "clients", ["orders_count"], :name => "index_clients_on_orders_count"
+  add_index "clients", ["origin_id"], :name => "index_clients_on_origin_id"
+
+  create_table "contact_people", :force => true do |t|
+    t.integer  "mini_client_id"
+    t.string   "name"
+    t.integer  "sex"
+    t.integer  "contact_nature_id"
+    t.string   "position"
+    t.string   "mobile"
+    t.string   "tel"
+    t.string   "email"
+    t.string   "qq"
+    t.text     "description"
+    t.integer  "created_user_id"
+    t.datetime "created_at",        :null => false
+    t.datetime "updated_at",        :null => false
+  end
+
+  add_index "contact_people", ["contact_nature_id"], :name => "index_contact_people_on_contact_nature_id"
+  add_index "contact_people", ["mini_client_id"], :name => "index_contact_people_on_mini_client_id"
+  add_index "contact_people", ["mobile"], :name => "index_contact_people_on_mobile"
+
+  create_table "contact_records", :force => true do |t|
+    t.date     "contact_date"
+    t.string   "contact_person"
+    t.integer  "contact_person_id"
+    t.integer  "contact_way_id"
+    t.integer  "mini_client_id"
+    t.integer  "user_id"
+    t.integer  "contact_result_id"
+    t.boolean  "is_move_to_public_store"
+    t.string   "introduce_product"
+    t.string   "introduce_server"
+    t.string   "interest_point"
+    t.string   "dissent_point"
+    t.string   "invalid_contact_description"
+    t.string   "description"
+    t.string   "follow_ideas"
+    t.integer  "created_user_id"
+    t.datetime "created_at",                  :null => false
+    t.datetime "updated_at",                  :null => false
+  end
+
+  add_index "contact_records", ["contact_person_id"], :name => "index_contact_records_on_contact_person_id"
+  add_index "contact_records", ["contact_result_id"], :name => "index_contact_records_on_contact_result_id"
+  add_index "contact_records", ["contact_way_id"], :name => "index_contact_records_on_contact_way_id"
+  add_index "contact_records", ["created_user_id"], :name => "index_contact_records_on_created_user_id"
+  add_index "contact_records", ["mini_client_id"], :name => "index_contact_records_on_mini_client_id"
+  add_index "contact_records", ["user_id"], :name => "index_contact_records_on_user_id"
+
+  create_table "contact_reminds", :force => true do |t|
+    t.string   "name"
+    t.datetime "remind_datetime"
+    t.text     "remind_content"
+    t.integer  "user_id"
+    t.integer  "mini_client_id"
+    t.boolean  "is_reminded",     :default => false
+    t.integer  "created_user_id"
+    t.datetime "created_at",                         :null => false
+    t.datetime "updated_at",                         :null => false
+  end
+
+  add_index "contact_reminds", ["is_reminded"], :name => "index_contact_reminds_on_is_reminded"
+  add_index "contact_reminds", ["mini_client_id"], :name => "index_contact_reminds_on_mini_client_id"
+  add_index "contact_reminds", ["user_id"], :name => "index_contact_reminds_on_user_id"
+
+  create_table "departments", :force => true do |t|
+    t.string   "name"
+    t.integer  "parent_id"
+    t.integer  "cate"
+    t.integer  "manager_id"
+    t.text     "description"
+    t.integer  "users_count",     :default => 0
+    t.integer  "created_user_id"
+    t.datetime "created_at",                     :null => false
+    t.datetime "updated_at",                     :null => false
+  end
+
+  add_index "departments", ["manager_id"], :name => "index_departments_on_manager_id"
+  add_index "departments", ["parent_id"], :name => "index_departments_on_parent_id"
+
+  create_table "departments_users", :id => false, :force => true do |t|
+    t.integer "department_id"
+    t.integer "user_id"
+  end
+
+  add_index "departments_users", ["department_id"], :name => "index_departments_users_on_department_id"
+  add_index "departments_users", ["user_id"], :name => "index_departments_users_on_user_id"
+
+  create_table "mini_clients", :force => true do |t|
+    t.integer  "client_id"
+    t.integer  "public_store_id"
+    t.integer  "user_id"
+    t.integer  "share_user_id"
+    t.integer  "status_num",      :limit => 2, :default => 0
+    t.integer  "serve_user1_id"
+    t.integer  "serve_user2_id"
+    t.datetime "due_time"
+    t.integer  "orders_count"
+    t.integer  "created_user_id"
+    t.datetime "created_at",                                  :null => false
+    t.datetime "updated_at",                                  :null => false
+  end
+
+  add_index "mini_clients", ["client_id"], :name => "index_mini_clients_on_client_id"
+  add_index "mini_clients", ["created_user_id"], :name => "index_mini_clients_on_created_user_id"
+  add_index "mini_clients", ["orders_count"], :name => "index_mini_clients_on_orders_count"
+  add_index "mini_clients", ["public_store_id"], :name => "index_mini_clients_on_public_store_id"
+  add_index "mini_clients", ["serve_user1_id"], :name => "index_mini_clients_on_serve_user1_id"
+  add_index "mini_clients", ["serve_user2_id"], :name => "index_mini_clients_on_serve_user2_id"
+  add_index "mini_clients", ["share_user_id"], :name => "index_mini_clients_on_share_user_id"
+  add_index "mini_clients", ["status_num"], :name => "index_mini_clients_on_status_num"
+  add_index "mini_clients", ["user_id"], :name => "index_mini_clients_on_user_id"
+
+  create_table "order_items", :force => true do |t|
+    t.integer  "order_id"
+    t.integer  "product_id"
+    t.integer  "server_length"
+    t.integer  "created_user_id"
+    t.date     "serve_start_at",                                :default => '2012-06-29'
+    t.date     "serve_end_at",                                                            :null => false
+    t.decimal  "contract_amount", :precision => 8, :scale => 2, :default => 0.0
+    t.decimal  "received_amount", :precision => 8, :scale => 2, :default => 0.0
+    t.decimal  "owe_amount",      :precision => 8, :scale => 2, :default => 0.0
+    t.datetime "created_at",                                                              :null => false
+    t.datetime "updated_at",                                                              :null => false
+  end
+
+  add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
+  add_index "order_items", ["product_id"], :name => "index_order_items_on_product_id"
+  add_index "order_items", ["serve_end_at"], :name => "index_order_items_on_serve_end_at"
+  add_index "order_items", ["serve_start_at"], :name => "index_order_items_on_serve_start_at"
+
+  create_table "orders", :force => true do |t|
+    t.integer  "client_id"
+    t.string   "number"
+    t.text     "description"
+    t.text     "contact_person_id"
+    t.integer  "created_user_id"
+    t.integer  "check_status",      :limit => 2,                               :default => 0
+    t.decimal  "contract_amount",                :precision => 8, :scale => 2, :default => 0.0
+    t.decimal  "received_amount",                :precision => 8, :scale => 2, :default => 0.0
+    t.decimal  "owe_amount",                     :precision => 8, :scale => 2, :default => 0.0
+    t.date     "serve_start_at",                                               :default => '2012-06-29'
+    t.date     "serve_end_at",                                                                           :null => false
+    t.integer  "mini_client_id"
+    t.datetime "created_at",                                                                             :null => false
+    t.datetime "updated_at",                                                                             :null => false
+  end
+
+  add_index "orders", ["check_status"], :name => "index_orders_on_check_status"
+  add_index "orders", ["client_id"], :name => "index_orders_on_client_id"
+  add_index "orders", ["created_user_id"], :name => "index_orders_on_created_user_id"
+  add_index "orders", ["mini_client_id"], :name => "index_orders_on_mini_client_id"
+  add_index "orders", ["number"], :name => "index_orders_on_number"
+
+  create_table "paid_items", :force => true do |t|
+    t.integer  "order_id"
+    t.integer  "order_item_id"
+    t.decimal  "received_amount", :precision => 10, :scale => 0, :default => 0, :null => false
+    t.integer  "created_user_id"
+    t.datetime "created_at",                                                    :null => false
+    t.datetime "updated_at",                                                    :null => false
+  end
+
+  add_index "paid_items", ["created_user_id"], :name => "index_paid_items_on_created_user_id"
+  add_index "paid_items", ["order_id"], :name => "index_paid_items_on_order_id"
+  add_index "paid_items", ["order_item_id"], :name => "index_paid_items_on_order_item_id"
+
+  create_table "permissions", :force => true do |t|
+    t.string   "name"
+    t.text     "c_actions"
+    t.text     "description"
+    t.integer  "cate"
+    t.integer  "created_user_id"
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
+  end
+
+  create_table "permissions_roles", :id => false, :force => true do |t|
+    t.integer "role_id"
+    t.integer "permission_id"
+  end
+
+  add_index "permissions_roles", ["permission_id"], :name => "index_permissions_roles_on_permission_id"
+  add_index "permissions_roles", ["role_id"], :name => "index_permissions_roles_on_role_id"
+
+  create_table "positions", :force => true do |t|
+    t.string   "name"
+    t.integer  "department_id"
+    t.text     "description"
+    t.integer  "users_count",     :default => 0
+    t.integer  "created_user_id"
+    t.datetime "created_at",                     :null => false
+    t.datetime "updated_at",                     :null => false
+  end
+
+  add_index "positions", ["department_id"], :name => "index_positions_on_department_id"
+
+  create_table "products", :force => true do |t|
+    t.string   "name"
+    t.string   "number"
+    t.text     "description"
+    t.integer  "category_id"
+    t.integer  "cate"
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
+  end
+
+  add_index "products", ["cate"], :name => "index_products_on_cate"
+  add_index "products", ["category_id"], :name => "index_products_on_category_id"
+  add_index "products", ["name"], :name => "index_products_on_name"
+  add_index "products", ["number"], :name => "index_products_on_number"
+
+  create_table "protect_times", :force => true do |t|
+    t.integer  "cate",                           :null => false
+    t.string   "name"
+    t.integer  "time_length",     :default => 1
+    t.text     "description"
+    t.integer  "created_user_id"
+    t.datetime "created_at",                     :null => false
+    t.datetime "updated_at",                     :null => false
+  end
+
+  add_index "protect_times", ["cate"], :name => "index_protect_times_on_cate"
+  add_index "protect_times", ["time_length"], :name => "index_protect_times_on_time_length"
+
+  create_table "public_stores", :force => true do |t|
+    t.string   "name"
+    t.text     "description"
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
+  end
+
+  create_table "public_stores_users", :id => false, :force => true do |t|
+    t.integer "public_store_id"
+    t.integer "user_id"
+  end
+
+  add_index "public_stores_users", ["public_store_id"], :name => "index_public_stores_users_on_public_store_id"
+  add_index "public_stores_users", ["user_id"], :name => "index_public_stores_users_on_user_id"
+
+  create_table "roles", :force => true do |t|
+    t.string   "name"
+    t.text     "description"
+    t.integer  "cate",                 :default => 0
+    t.integer  "protect_client_count", :default => 0
+    t.integer  "created_user_id"
+    t.datetime "created_at",                          :null => false
+    t.datetime "updated_at",                          :null => false
+  end
+
+  add_index "roles", ["cate"], :name => "index_roles_on_cate"
+  add_index "roles", ["name"], :name => "index_roles_on_name"
+  add_index "roles", ["protect_client_count"], :name => "index_roles_on_protect_client_count"
+
+  create_table "roles_users", :id => false, :force => true do |t|
+    t.integer "role_id"
+    t.integer "user_id"
+  end
+
+  add_index "roles_users", ["role_id"], :name => "index_roles_users_on_role_id"
+  add_index "roles_users", ["user_id"], :name => "index_roles_users_on_user_id"
+
+  create_table "serve_records", :force => true do |t|
+    t.integer  "order_id"
+    t.integer  "mini_client_id"
+    t.integer  "created_user_id"
+    t.text     "content"
+    t.integer  "contact_person_id"
+    t.integer  "contact_way_id"
+    t.integer  "contact_result_id"
+    t.datetime "created_at",                  :null => false
+    t.datetime "updated_at",                  :null => false
+    t.string   "invalid_contact_description"
+  end
+
+  add_index "serve_records", ["created_user_id"], :name => "index_serve_records_on_created_user_id"
+  add_index "serve_records", ["mini_client_id"], :name => "index_serve_records_on_mini_client_id"
+  add_index "serve_records", ["order_id"], :name => "index_serve_records_on_order_id"
+
+  create_table "sessions", :force => true do |t|
+    t.string   "session_id", :null => false
+    t.text     "data"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "sessions", ["session_id"], :name => "index_sessions_on_session_id"
+  add_index "sessions", ["updated_at"], :name => "index_sessions_on_updated_at"
+
+  create_table "update_logs", :force => true do |t|
+    t.integer  "update_logs_resource_id"
+    t.string   "update_logs_resource_type"
+    t.text     "content"
+    t.integer  "created_user_id"
+    t.datetime "created_at",                :null => false
+    t.datetime "updated_at",                :null => false
+  end
+
+  add_index "update_logs", ["created_user_id"], :name => "index_update_logs_on_created_user_id"
+  add_index "update_logs", ["update_logs_resource_id"], :name => "index_update_logs_on_update_logs_resource_id"
+  add_index "update_logs", ["update_logs_resource_type"], :name => "index_update_logs_on_update_logs_resource_type"
+
+  create_table "users", :force => true do |t|
+    t.string   "email",                       :default => "",    :null => false
+    t.string   "hashed_password",             :default => "",    :null => false
+    t.string   "salt",                        :default => "",    :null => false
+    t.string   "login",                       :default => "",    :null => false
+    t.string   "name"
+    t.integer  "sex"
+    t.integer  "department_id"
+    t.integer  "manager_department_id"
+    t.integer  "position_id"
+    t.integer  "role_id"
+    t.string   "mobile"
+    t.string   "tel"
+    t.string   "qq"
+    t.date     "enter_date"
+    t.date     "birth"
+    t.integer  "nation"
+    t.integer  "marriage_status"
+    t.string   "last_college"
+    t.integer  "edu_level"
+    t.string   "identity_card"
+    t.string   "current_address"
+    t.string   "family_address"
+    t.string   "father"
+    t.date     "father_birth"
+    t.string   "father_mobile"
+    t.string   "mother"
+    t.date     "mother_birth"
+    t.string   "mother_mobile"
+    t.text     "comment"
+    t.boolean  "is_lock",                     :default => false
+    t.integer  "cate",                        :default => 0
+    t.string   "person_image_file_name"
+    t.string   "person_image_content_type"
+    t.integer  "person_image_file_size"
+    t.datetime "person_image_updated_at"
+    t.string   "identity_image_file_name"
+    t.string   "identity_image_content_type"
+    t.integer  "identity_image_file_size"
+    t.datetime "identity_image_updated_at"
+    t.boolean  "is_manager",                  :default => false
+    t.integer  "created_user_id"
+    t.datetime "created_at",                                     :null => false
+    t.datetime "updated_at",                                     :null => false
+  end
+
+  add_index "users", ["cate"], :name => "index_users_on_cate"
+  add_index "users", ["department_id"], :name => "index_users_on_department_id"
+  add_index "users", ["login"], :name => "index_users_on_login", :unique => true
+  add_index "users", ["position_id"], :name => "index_users_on_position_id"
+
+end

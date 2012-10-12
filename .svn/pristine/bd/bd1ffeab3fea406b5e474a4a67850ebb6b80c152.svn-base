@@ -1,0 +1,9 @@
+# encoding: utf-8
+class HomeController < ApplicationController
+
+  def index
+    @check_items = @current_user.check_items.includes(:check_resource).where("is_checked=0").group_by{|c|c.check_resource_type} rescue []
+    @contact_reminds = @current_user.contact_reminds.where("is_reminded=?",false) rescue []
+  end
+
+end

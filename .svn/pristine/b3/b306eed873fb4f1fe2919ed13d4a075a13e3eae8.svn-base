@@ -1,0 +1,65 @@
+<!--<div id="add_contact_list" style="display: none;">-->
+<%= form_for @serve_record,:url=>{:action=>"ajax_serve_record_create",:id=>@mini_client},
+             :remote=>true,:html=>{:id=>"ajax_serve_record_create_form"+@mini_client.id.to_s} do |f| %>
+    <%= render :partial => "/mini_clients/ajax_show/serve_record/form",:locals => {:f=>f} %>
+<% end %>
+<!--</div>-->
+
+<script type="text/javascript">
+
+    jQuery(document).ready(function(){
+
+        //自动可以选择也可以填写的输入框
+        $.getJSON("/categories/ajax_result_serve_record",{},function(result){
+            var invalid_contact_description = result
+            $(function() {
+                $('#serve_record_invalid_contact_description').autocomplete(invalid_contact_description, {
+                    max: 30,    //列表里的条目数
+                    minChars: 0,    //自动完成激活之前填入的最小字符
+                    width: 400,     //提示的宽度，溢出隐藏
+                    scrollHeight: 300,   //提示的高度，溢出显示滚动条
+                    matchContains: true,    //包含匹配，就是data参数里的数据，是否只要包含文本框里的数据就显示
+                    autoFill: false,    //自动填充
+                    formatItem: function(row, i, max) {
+                        return i + '/' + max + ':"' + row.name;
+                    },
+                    formatMatch: function(row, i, max) {
+                        return row.name
+                    },
+                    formatResult: function(row) {
+                        return row.name;
+                    }
+                }).result(function(event, row, formatted) {
+                        });
+            });
+        });
+
+
+        var mini_client_id = '<%= @mini_client.id.to_s %>'
+        $('#ajax_serve_record_create_form'+mini_client_id)
+                .bind("ajax:beforeSend", function(evt, xhr, settings){
+                    var field1=$("#serve_record_order_id").val();
+                    var field2=$("#serve_record_invalid_contact_description").val();
+                    var field3=$("#serve_record_content").val();
+                    var field4=$("input[type=radio]:checked").val();
+                    if(field3=="" && field4 == "1"){
+                        alert("服务备注不能为空！") ;
+                        return false;
+                    };
+                    if(field2=="" && field4 == "0"){
+                        alert("情况描述不能为空！") ;
+                        return false;
+                    };
+                    if(!confirm("确认提交？")){
+                        return false;
+                    };
+
+                })
+                .bind("ajax:success", function(evt, data, status, xhr){
+                    $("#show-tab-3"+mini_client_id).html(data);
+                    alert("保存成功！");
+                })
+
+    })
+
+</script>

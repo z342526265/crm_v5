@@ -1,0 +1,23 @@
+<% #encoding: utf-8 %>
+<p id="notice"><%= notice %></p>
+<% category_form_vars %>
+<p>
+  <b><%= @name_label %>名称:</b>
+  <%= @category.name %>
+</p>
+
+<% if @category.cate == "client_grade" %>
+<p>
+  <b>是否需要审核:</b>
+  <%= @category.need_verify ? "是" : "否" %>
+</p>
+<% end %>
+
+<p>
+  <b>备注:</b>
+  <%= @category.description %>
+</p>
+
+
+<%= link_to_custom '编辑', :controller=>"categories",:action=>:edit,:id=>@category,:cate=>params[:cate] %> |
+<%= link_to_custom '返回', :controller=>"categories",:action=>:index,:cate=>params[:cate] %>

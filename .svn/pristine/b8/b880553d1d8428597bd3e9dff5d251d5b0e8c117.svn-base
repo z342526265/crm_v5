@@ -1,0 +1,138 @@
+# encoding: utf-8
+class Client < ActiveRecord::Base
+
+  include SetCreatedUser
+  include CustomAssociationMethod
+
+  belongs_to :grade,:foreign_key => "grade_id",:class_name => "Category"
+  has_many :mini_clients,:dependent => :destroy
+  has_many :public_stores,:through => :mini_clients
+  has_many :update_logs,:as=>:update_logs_resource
+  has_many :check_items,:as=>:check_resource
+
+
+  #validates_presence_of :name,:nature_id,:origin_id,:grade_id
+  validates_uniqueness_of :name
+
+  #Category.find_by_cate("client_field").description.split(",").each do |attr|
+  #  validates_presence_of attr.to_sym
+  #end
+
+  COLUMNS = {"name"=>"客户姓名",
+             "web_url"=>"公司网址",
+             "contact"=>"联系人",
+             "mobile"=>"手机",
+             "tel"=>"电话",
+             "fax"=>"传真",
+             "qq"=>"QQ/MNS",
+             "email"=>"Email",
+             "province"=>"所属省",
+             "city"=>"所属市",
+             "district"=>"所属县",
+             "address"=>"地址",
+             "trade"=>"行业",
+             "legal_person"=>"企业法人",
+             "fund"=>"注册资金",
+             "found_date"=>"成立日期",
+             "main_business"=>"主要业务",
+             "main_client_base"=>"主要客户群",
+             "business_rang"=>"主要客户群",
+             "business_area"=>"主要客户群",
+             "description"=>"备注",
+             "net_spread"=>"网络推广情况",
+             "net_spread"=>"网络推广情况",
+             "number"=>"客户编号",
+             "district" => "地区"
+
+  }
+
+  COLUMN_NAMES = [
+      "name",
+      "nature_id",
+      "origin_id",
+      "grade_id",
+      "web_url",
+      "contact",
+      "mobile",
+      "tel",
+      "fax",
+      "qq",
+      "email",
+      "province",
+      "city",
+      "district",
+      "address",
+      "trade",
+      "legal_person",
+      "fund",
+      "found_date",
+      "main_business",
+      "main_client_base",
+      "business_rang",
+      "business_area",
+      "description",
+      "net_spread",
+      "number"
+  ]
+
+
+
+  COLUMN_LABELS = ['客户名称','省/市',"市","县/区","公司网站",'负责人','手机','电话','传真','QQ/MSN','邮箱','地址','行业',
+                   '企业法人','注册资金','成立日期','主营业务','主要客户群','营业范围','营业区域','网络推广情况','其他']
+  COLUMN_ATTRS = %w(name province city district web_url contact mobile tel fax qq email address trade
+                legal_person fund found_date main_business main_client_base business_rang business_area net_spread description)
+
+
+  #搜索时显示的的状态
+  def public_stores_search_text
+    self.mini_clients.map{|m|"#{m.public_store.name}->#{m.search_status_text}"}
+  end
+
+
+  def public_store_names_text
+    self.mini_clients.map{|m|m.public_store.name}.join(",")
+  end
+
+ def grade_text
+   check_item = self.check_items.where("is_checked=?",false).order("created_at DESC").first
+   if check_item.present?
+     "目前类别为#{self.grade_name},#{check_item.created_user_name}申请改变类别，\n【#{check_item.description}】"
+   else
+     self.grade_name
+   end
+ end
+
+
+  before_create :set_data1
+  before_update :set_update_log
+  after_update :save_update_log
+  #after_create :set_data2
+
+  private
+  def set_data1
+    count_num = Client.count("id",:conditions =>["name is not null"] ) + 1
+    num = 6-count_num.to_s.length
+    self.number = "0"*num + count_num.to_s
+  end
+
+
+
+  #设置编辑日志
+  def set_update_log
+    if self.changed?
+      content = ""
+      self.changes.each do |key,val|
+        content << "【#{COLUMNS[key]}】由【#{val.first}】更改为【#{val.second}】;" if COLUMNS[key]
+      end
+      if content != ""
+        @update_log = self.update_logs.build(:created_user_id=>User.current.id,:content=>content)
+      end
+    end
+  end
+
+  #保存编辑日志
+  def save_update_log
+    @update_log.save if @update_log
+  end
+
+end

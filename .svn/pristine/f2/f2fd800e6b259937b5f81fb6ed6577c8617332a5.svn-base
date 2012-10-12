@@ -1,0 +1,55 @@
+<% #encoding: utf-8 %>
+
+    <%= f.error_messages %>
+    <% unless ["client_field","shield"].include? params[:cate] %>
+        <div class="field">
+            <%= f.label :name,"#{@name_label}名称" %><br />
+            <%= f.text_field :name %>
+        </div>
+    <% end %>
+
+    <%= f.hidden_field :cate %>
+    <%#= hidden_field_tag "category[department_ids][]" %>
+    <%# if params[:cate] == "public_store" || params[:cate]=="personal_store" && @category.level == 3 %>
+        <!--<div class="field">-->
+          <!--<h3>所属部门</h3><br />-->
+
+          <!--<%# Department.all.each do |d| %>-->
+              <!--<%#= d.name %><%#= check_box_tag "category[department_ids][]",d.id,@category.departments.include?(d) %>-->
+          <!--<%# end %>-->
+
+        <!--</div>-->
+    <%# end %>
+
+    <% if params[:cate] == "protect_client_count" %>
+        <!--<div class="field">-->
+          <%= f.label :num,"可保护的数量" %><br />
+          <%= f.text_field :num %>
+        <!--</div>-->
+    <% end %>
+
+    <% if ["client_grade","contact_result"].include? @category.cate %>
+        <div class="field">
+            <%= f.label :need_verify,@need_verify_label %><br />
+            <%= f.check_box :need_verify %>
+        </div>
+    <% end %>
+     <% if params[:cate] == "client_field" %>
+        <div class="field">
+          <%= f.label :client_field,@description_label %><br />
+          <% Category::CLIENT_FIELD.each do |key,val| %>
+            <%= check_box_tag "category[client_field][]",key,@category.client_field.include?(val) %><%= val %>
+          <% end %>
+        </div>
+     <% else %>
+        <div class="field">
+            <%= f.label :description,@description_label %><br />
+            <%= f.text_area :description,:cols=>25,:rows=>5 %>
+        </div>
+    <% end %>
+    <div class="actions">
+        <%= f.submit "提交" %>
+    </div>
+
+
+<%# render "sidebar" %>

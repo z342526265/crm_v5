@@ -1,0 +1,9 @@
+<% category_form_vars %>
+<h1><%= @name_label %>编辑</h1>
+
+<%= form_for(@category,:url=>{:action=>"update",:cate=>params[:cate],:id=>@category}) do |f| %>
+    <%= render :partial =>  'form',:locals=>{:f=>f} %>
+<% end %>
+
+<%#= link_to_custom '查看', :action=>"show",:cate=>params[:cate] %>
+<%= link_to_custom '返回',:controller=>"categories", :action=>"index",:cate=>params[:cate] %>

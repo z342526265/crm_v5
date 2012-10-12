@@ -1,0 +1,5 @@
+<h1>新建产品</h1>
+<%= form_for(@product,:url=>{:controller=>"products",:action=>"create"}) do |f| %>
+    <%= render :partial => 'form',:locals=>{:f=>f} %>
+<% end %>
+<%= link_to_custom '返回',:controller=>"products", :action=>"index" %>

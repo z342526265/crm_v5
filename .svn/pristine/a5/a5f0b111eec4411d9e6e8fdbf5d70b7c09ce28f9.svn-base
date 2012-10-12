@@ -1,0 +1,36 @@
+# encoding: utf-8
+namespace :permission do
+  desc "权限的相关操作"
+
+
+  task(:update_manager_role=>:environment) do
+    #role = Role.find_by_name("总经理")
+    #role.update_attributes(:permissions=>Permission.all)
+    #puts "增加成功！"
+  end
+
+  task(:add=>:environment) do
+    #p36 = Permission.create({:name=>"订单相关审核",
+    #                         :c_actions=>[
+    #                             "orders-check",
+    #                         ],:cate => 36})
+    #
+    #
+    #role = Role.find_by_name("总经理")
+    #role.update_attributes(:permissions=>Permission.all)
+
+
+    #给客户查看增加分页的action
+
+    p18 = Permission.find_by_cate(18)   #找到客户详情权限
+
+    p18.c_actions << "mini_clients-ajax_index_table_v2"
+    p18.c_actions << "mini_clients-ajax_index_table_v3"
+    p18.c_actions << "mini_clients-ajax_index_table_v4"
+
+    p18.save
+
+
+    puts "success...."
+  end
+end

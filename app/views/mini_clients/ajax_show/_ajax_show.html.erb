@@ -1,0 +1,40 @@
+<!--客户基本信息-->
+<div id='<%= "show-tab-a"+@mini_client.id.to_s %>' style="display:block;  width:100%;">
+  <%= render :partial=>"/mini_clients/ajax_show/client_information/basic_information",:locals=>{:client=>@mini_client} %>
+</div>
+
+<!--联系人信息-->
+<div id='<%= "show-tab-1"+@mini_client.id.to_s %>'>
+  <%= render :partial=>"/mini_clients/ajax_show/contact_person/contact_person" %>
+</div>
+
+<!--联系记录-->
+<div id='<%= "show-tab-2"+@mini_client.id.to_s %>'>
+  <%= render :partial=>"/mini_clients/ajax_show/contact_record/contact_record" %>
+</div>
+
+<% if @current_user.had_permission?(22) %>
+    <!--服务小记-->
+    <div id='<%= "show-tab-3"+@mini_client.id.to_s %>'>
+      <%= render :partial=>"/mini_clients/ajax_show/serve_record/serve_record" %>
+    </div>
+<% end %>
+
+
+<!--添加订单-->
+<% if @current_user.had_permission?(24) %>
+    <div id='<%= "show-tab-4"+@mini_client.id.to_s %>'>
+      <%= render :partial=>"/mini_clients/ajax_show/order/order_index" %>
+    </div>
+<% end %>
+
+<script type="text/javascript">
+
+</script>
+
+
+
+
+
+
+

@@ -1,0 +1,83 @@
+# encoding: utf-8
+namespace :permission do
+  desc "权限的相关操作"
+
+
+  task(:update_manager_role=>:environment) do
+    role = Role.find_by_name("总经理")
+    role.update_attributes(:permissions=>Permission.all)
+    puts "增加成功！"
+  end
+
+  task(:add_1=>:environment) do
+    #给客户查看增加分页的action
+    p18 = Permission.find_by_cate(18)   #找到客户详情权限
+    p18.c_actions << "mini_clients-ajax_index_table_v2"
+    p18.c_actions << "mini_clients-ajax_index_table_v3"
+    p18.c_actions << "mini_clients-ajax_index_table_v4"
+    p18.save
+    puts "success...."
+  end
+
+  task(:create_2=>:environment) do
+    #增加修改订单的权限
+    p37 = Permission.create({:name=>"修改订单",
+                             :c_actions=>[
+                                 "orders-ajax_update_order_item",
+                             ],:cate => 37})
+    puts "success...."
+  end
+
+  task(:create_3=>:environment) do
+    #增加修改订单的权限
+    p38 = Permission.create({:name=>"修改用户账号密码",
+                             :c_actions=>[
+                                 "users-update_account",
+                             ],:cate => 38})
+    puts "success...."
+  end
+
+  #客户修改权限增加action
+  task(:add_4=>:environment) do
+    #找到客户修改权限
+    p15 = Permission.find_by_cate(15)
+    p15.c_actions << "clients-ajax_create_mini_client"
+    p15.save
+    puts "success...."
+  end
+
+  task(:create_5=>:environment) do
+    #增加修改订单的权限
+    p39 = Permission.create({:name=>"订单续费",
+                             :c_actions=>[
+                                 "orders-add_renew_fee",
+                             ],:cate => 39})
+    puts "success...."
+  end
+
+  task(:add_6=>:environment) do
+    #找到客户修改权限
+    p24 = Permission.find_by_cate(24)
+    p24.c_actions << "orders-ajax_cancel_create"
+    p24.c_actions << "orders-ajax_cancel_update"
+    p24.save
+    puts "success...."
+  end
+
+  task(:add_7=>:environment) do
+    #找到客户修改权限
+    p36 = Permission.find_by_cate(36)
+    p36.c_actions << "home-order_show"
+    p36.save
+    puts "success...."
+  end
+
+
+
+  #task :reset_password=>:environment do
+  #  @user = User.find_by_login(ENV["user_login"])
+  #  @user.update_attribute(:password,"123456")
+  #  #增加修改订单的权限
+  #  puts "新密码为123456"
+  #end
+end
